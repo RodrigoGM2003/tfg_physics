@@ -1,0 +1,77 @@
+# Ignore build directories
+builds/windows/bin/
+builds/windows/cmake/
+builds/windows/.vscode/
+
+# Ignore Visual Studio Code settings
+.vscode/
+
+# Ignore Visual Studio files
+.vs/
+*.vcxproj
+*.vcxproj.filters
+*.sln
+slnx.sqlite
+VSWorkspaceState.json
+
+# Ignore CMake generated files
+CMakeWorkspaceSettings.json
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# Ignore log files
+*.log
+
+# Ignore compiled binaries
+*.exe
+*.dll
+*.so
+*.dylib
+*.lib
+*.obj
+*.o
+*.pdb
+
+# Ignore temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore user-specific files
+*.user
+*.userosscache
+*.suo
+*.ntvs*
+*.njsproj
+*.sln.docstates
+
+# Ignore Python virtual environments
+venv/
+__pycache__/
+
+# Ignore node_modules
+node_modules/
+
+# Ignore other unnecessary files
+*.pyc
+*.class
+*.jar
+*.war
+*.ear
+*.iml
+*.ipr
+*.iws
+
+# Keep necessary project files
+!LICENSE
+!README.md
+!src/
+!res/
