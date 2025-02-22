@@ -3,21 +3,30 @@
 
 #pragma once
 
+#ifndef ASSERT
+#define ASSERT(x) if (!(x)) __debugbreak();
+#endif
+
+#ifndef GLCall
+    #define GLCall(x) GLClearError();\
+    x;\
+    ASSERT(GLLogCall(#x, __FILE__, __LINE__))
+#endif
+
+
 #include <cassert>
 #include <GL/glew.h>
 
-#include "buffers/vertex_array.h"
-#include "buffers/index_buffer.h"
-#include "shader.h"
+#include "camera.h"
+#include "meshes/mesh.h"
+#include "meshes/instanced_mesh.h"
 
-#define ASSERT(x) if (!(x)) __debugbreak();
-#define GLCall(x) GLClearError();\
-    x;\
-    ASSERT(GLLogCall(#x, __FILE__, __LINE__))
-// #define GLCall(x) do { GLClearError();\
-//     x;\
-//     ASSERT(GLLogCall(#x, __FILE__, __LINE__));\
-// } while(0)
+// Forward declarations
+class Mesh;
+class InstancedMesh;
+class Shader;
+class Camera;
+
 
 /**
  * @brief Clears the OpenGL error buffer
@@ -52,19 +61,20 @@ public:
     
     /**
      * @brief Draws the vertex array
-     * @param va the vertex array
-     * @param ib the index buffer
+     * @param mesh the mesh
      * @param shader the shader
+     * @param camera the camera
      */
-    void draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const;
+    void draw(const Mesh& mesh, Shader& shader, Camera& camera);
 
-        /**
+    /**
      * @brief Draws the vertex array
      * @param va the vertex array
      * @param ib the index buffer
      * @param shader the shader
      */
-    void instancedDraw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader, unsigned int instances = 1) const;
+    void instancedDraw(const InstancedMesh& instanced_mesh, Shader& shader, Camera& camera, unsigned int instances = 1);
+
 };
 
 #endif // RENDERER_H

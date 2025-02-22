@@ -142,16 +142,14 @@ namespace test{
         m_shader.setUniformVec3f("u_light_pos", m_light.getPosition());
         m_shader.setUniform1f("u_a", 0.05f);
         m_shader.setUniform1f("u_b", 0.01f);
-        m_cube.draw(m_shader, m_camera);
 
         //Place the light
         m_light_shader.bind();
         m_light_shader.setUniformVec4f("u_light_color", light_color);
-        m_light.draw(m_light_shader, m_camera);      
-
+        
         //Draw the scene
-        renderer.draw(m_cube.getVertexArray(), m_cube.getIndexBuffer(),  m_shader);
-        renderer.draw(m_light.getVertexArray(), m_light.getIndexBuffer(),  m_light_shader);
+        renderer.draw(m_cube, m_shader, m_camera);
+        renderer.draw(m_light, m_light_shader, m_camera);
     }
 
 

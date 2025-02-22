@@ -7,34 +7,22 @@ Mesh::Mesh():
     m_scale(glm::vec3(1.0f))
 {}
 
-Mesh::Mesh(std::vector<Vertex> &vertices, std::vector<unsigned int> &indices)
-    : m_vertices(vertices), m_indices(indices){
-
-    this->setBuffers();
-}
-
-void Mesh::draw(Shader &shader, Camera &camera){
-    //Bind the shader
-    shader.bind();
-
-    shader.setUniformVec3f("u_cam_pos", camera.getPosition());
-
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, m_position);
-    model *= glm::toMat4(m_orientation);
-    model = glm::scale(model, m_scale);
-
-    shader.setUniformMat4f("u_model", model);
-    camera.matrix(shader, "u_cam_matrix");
-}
-
-
 void Mesh::setData(std::vector<Vertex> &vertices, std::vector<unsigned int> &indices){
     m_vertices = vertices;
     m_indices = indices;
 
     this->setBuffers();
 }
+
+glm::mat4 Mesh::getModelMatrix() const{
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, m_position);
+    model *= glm::toMat4(m_orientation);
+    model = glm::scale(model, m_scale);
+
+    return model;
+}
+
 
 void Mesh::setBuffers(){
     //Create vertex buffer

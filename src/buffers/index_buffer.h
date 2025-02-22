@@ -40,6 +40,10 @@ public:
      */
     void unbind() const;
 
+    /**
+     * @brief Gets the number of indices
+     * @return the number of indices
+     */
     inline unsigned int getCount() const { return m_count; }
 
 

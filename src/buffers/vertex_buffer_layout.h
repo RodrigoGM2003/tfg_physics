@@ -37,9 +37,17 @@ private:
     unsigned int m_stride; //Stride
     bool m_is_instanced = false;
 public:
+    /**
+     * @brief Creates a vertex buffer layout
+     * @param is_instanced if the layout is instanced
+     */
     VertexBufferLayout(bool is_instanced = false)
         : m_stride(0), m_is_instanced(is_instanced) {}
 
+    /**
+     * @brief Pushes an element into the buffer
+     * @param count the number of elements
+     */
     template<typename T>
     void push(unsigned int count){
         static_assert(false);
