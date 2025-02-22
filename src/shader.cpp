@@ -59,9 +59,24 @@ void Shader::setUniformVec4f(const std::string &name, const glm::vec4 &vector){
     GLCall(glUniform4f(getUniformLocation(name), vector.x, vector.y, vector.z, vector.w));
 }
 
-
 void Shader::setUniformMat4f(const std::string &name, const glm::mat4 &matrix){
     GLCall(glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, &matrix[0][0]));
+}
+
+void Shader::setUniformPointLight(const std::string& name, 
+    const glm::vec3& position, 
+    const glm::vec3& color, 
+    const float& intensity, 
+    const float& constant, 
+    const float& linear, 
+    const float& quadratic
+){
+    setUniformVec3f(name + ".position", position);
+    setUniformVec3f(name + ".color", color);
+    setUniform1f(name + ".intensity", intensity);
+    setUniform1f(name + ".constant", constant);
+    setUniform1f(name + ".linear", linear);
+    setUniform1f(name + ".quadratic", quadratic);
 }
 
 void Shader::setShader(const std::string &filename){

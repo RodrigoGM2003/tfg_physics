@@ -62,7 +62,7 @@ namespace test{
         m_cube.setData(vertices, indices);
         m_cube.setPosition(m_cube_start_pos);
 
-        m_shader.setShader("cube.shader");
+        m_shader.setShader("cube.glsl");
         m_shader.bind();
         m_shader.setUniformVec4f("u_light_color", light_color);
         m_shader.unbind();
@@ -97,7 +97,7 @@ namespace test{
         m_light.setData(light_vertices, light_indices);
         m_light.setPosition(m_light_start_pos);
 
-        m_light_shader.setShader("light.shader");
+        m_light_shader.setShader("light.glsl");
         m_light_shader.bind();
         m_light_shader.setUniformVec4f("u_light_color", light_color);
 

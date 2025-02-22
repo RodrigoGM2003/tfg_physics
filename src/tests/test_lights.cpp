@@ -58,24 +58,23 @@ namespace test{
             20, 22, 21, 20, 23, 22  // + Z face
         };
 
-        m_instances = 1000000;
         // std::vector<glm::mat4> model_matrices(m_instances);
         m_model_matrices = new std::vector<glm::mat4>(m_instances);
 
         // Make the cubes appear in a 3D grid
-        for (int x = 0; x < 100; x++) {
-            for (int y = 0; y < 100; y++) {
-                for (int z = 0; z < 100; z++) {
+        for (int x = 0; x < 10; x++) {
+            for (int y = 0; y < 10; y++) {
+                for (int z = 0; z < 10; z++) {
                     glm::mat4 model = glm::mat4(1.0f);
-                    model = glm::translate(model, glm::vec3(x * 4.0f, y * 4.0f, -z * 4.0f));
-                    m_model_matrices->at(x * 10000 + y * 100 + z) = model;
+                    model = glm::translate(model, glm::vec3(x * 2.0f, y * 2.0f, -z * 2.0f));
+                    m_model_matrices->at(x * 100 + y * 10 + z) = model;
                 }
             }
         }
         
         m_cube.setData(vertices, indices, *m_model_matrices, m_instances);
 
-        m_shader.setShader("multiple_cube.shader");
+        m_shader.setShader("multiple_cube.glsl");
         m_shader.bind();
         m_shader.setUniformVec4f("u_light_color", light_color);
         m_shader.unbind();
@@ -110,7 +109,7 @@ namespace test{
         m_light.setData(light_vertices, light_indices);
         m_light.setPosition(m_light_start_pos);
 
-        m_light_shader.setShader("light.shader");
+        m_light_shader.setShader("light.glsl");
         m_light_shader.bind();
         m_light_shader.setUniformVec4f("u_light_color", light_color);
 

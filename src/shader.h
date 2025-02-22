@@ -94,11 +94,30 @@ public:
     void setUniformVec4f(const std::string& name, const glm::vec4& vector);
 
     /**
-     * @brief Sets a uniform of type float
+     * @brief Sets a uniform of type mat4
      * @param name the name of the uniform
-     * @param v0 the value of the uniform
+     * @param matrix the value of the uniform
      */
     void setUniformMat4f(const std::string& name, const glm::mat4& matrix);
+
+    /**
+     * @brief Sets a point light
+     * @param name the name of the light
+     * @param position the position of the light
+     * @param color the color of the light
+     * @param intensity the intensity of the light
+     * @param constant the constant of the light
+     * @param linear the linear of the light
+     * @param quadratic the quadratic of the light
+     */
+    void setUniformPointLight(const std::string& name, 
+        const glm::vec3& position, 
+        const glm::vec3& color, 
+        const float& intensity, 
+        const float& constant, 
+        const float& linear, 
+        const float& quadratic
+    );
 
     /**
      * @brief Sets a shader
