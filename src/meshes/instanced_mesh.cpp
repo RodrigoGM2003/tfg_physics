@@ -1,25 +1,6 @@
 #include "instanced_mesh.h"
 #include <iostream>
 
-InstancedMesh::InstancedMesh(){
-}
-
-InstancedMesh::InstancedMesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, 
-                            std::vector<glm::mat4>& model_matrices, unsigned int instances)
-    : m_vertices(vertices), m_indices(indices), m_instances(instances), m_model_matrices(model_matrices){
-
-    this->setBuffers();
-}
-
-void InstancedMesh::draw(Shader &shader, Camera &camera){
-    //Bind the shader
-    shader.bind();
-
-    shader.setUniformVec3f("u_cam_pos", camera.getPosition());
-
-    camera.matrix(shader, "u_cam_matrix");
-}
-
 void InstancedMesh::updateModelMatrices(std::vector<glm::mat4> &model_matrices){
     m_model_matrices = model_matrices;
     m_ub.bind();

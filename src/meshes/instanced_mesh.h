@@ -29,22 +29,42 @@ private:
     VertexBuffer m_ub; //Uniform Buffer
 
 public:
-    InstancedMesh();
+    /**
+     * @brief Construct a new Instanced Mesh object
+     */
+    InstancedMesh(){};
 
-    InstancedMesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, 
-                std::vector<glm::mat4>& model_matrices, unsigned int instances);
-
-    void draw(Shader& shader, Camera& camera);
+    /**
+     * @brief Update the model matrices
+     * @param model_matrices the model matrices
+     */
     void updateModelMatrices(std::vector<glm::mat4>& model_matrices);
 
+    /**
+     * @brief Get the vertex array
+     */
     inline const VertexArray& getVertexArray() const { return m_va; }
+    
+    /**
+     * @brief Get the index buffer
+     */
     inline const IndexBuffer& getIndexBuffer() const { return m_ib; }
-
+    
+    /**
+     * @brief Set the data
+     * @param vertices the vertices
+     * @param indices the indices
+     * @param model_matrices the model matrices
+     * @param instances the number of instances
+     */
     void setData(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, 
                 std::vector<glm::mat4>& model_matrices, unsigned int instances);
 
 private:
-        void setBuffers();
+    /**
+     * @brief Set the buffers
+     */
+    void setBuffers();
 };
 
 

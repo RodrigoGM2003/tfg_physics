@@ -53,6 +53,12 @@ public:
      */
     void updateData(const void* data, unsigned int size, unsigned int offset = 0);
 
+    /**
+     * @brief Sets the buffer data
+     * @param data the data to be stored in the buffer
+     * @param size the size of the data
+     * @param usage the usage of the buffer
+     */
     void setBuffer(const void* data, unsigned int size, const unsigned int usage = GL_STATIC_DRAW);
 };
 

@@ -144,7 +144,6 @@ namespace test{
     }
 
 
-
     void TestLights::onRender(){
         Renderer renderer;
 
@@ -157,22 +156,14 @@ namespace test{
         m_shader.setUniformVec3f("u_light_pos", m_light.getPosition());
         m_shader.setUniform1f("u_a", m_a);
         m_shader.setUniform1f("u_b", m_b);
-        // m_shader.setUniformVec3f("u_sun_direction", glm::vec3(-1.0f, -1.0f, -1.0f)); // Example sun direction
-        // m_shader.setUniformVec4f("u_sun_color", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)); // Example sun color
-        m_cube.draw(m_shader, m_camera);
 
         //Place the light
         m_light_shader.bind();
         m_light_shader.setUniformVec4f("u_light_color", light_color);
-        m_light.draw(m_light_shader, m_camera);      
 
-        //Draw the scene
-        // for (int i = 0; i < 10000; i++)
-        //     renderer.draw(m_cube.getVertexArray(), m_cube.getIndexBuffer(),  m_shader);
-        // renderer.draw(m_cube.getVertexArray(), m_cube.getIndexBuffer(),  m_shader);
-        renderer.instancedDraw(m_cube.getVertexArray(), m_cube.getIndexBuffer(),  m_shader, m_instances);
-
-        renderer.draw(m_light.getVertexArray(), m_light.getIndexBuffer(),  m_light_shader);
+        //Draw the cube
+        renderer.instancedDraw(m_cube, m_shader, m_camera, m_instances);
+        renderer.draw(m_light, m_light_shader, m_camera);
     }
 
 
