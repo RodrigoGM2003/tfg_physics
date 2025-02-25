@@ -8,7 +8,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
-#include <omp.h>
+#include "constants.h"
 
 extern GLFWwindow * c_window;
 
@@ -18,45 +18,14 @@ namespace test{
         : m_camera(m_width, m_height, glm::vec3(0.0f, 0.0f, 3.0f)) {
 
         //Cube vertices
-        std::vector<Vertex> vertices = {
-            {{-0.5f, -0.5f, -0.5f},     {1, 1, 1, 1},      {0, -1, 0}}, // - Y face
-            {{ 0.5f, -0.5f, -0.5f},     {1, 1, 1, 1},      {0, -1, 0}},
-            {{ 0.5f, -0.5f,  0.5f},     {1, 1, 1, 1},      {0, -1, 0}},
-            {{-0.5f, -0.5f,  0.5f},     {1, 1, 1, 1},      {0, -1, 0}},
+        // std::vector<Vertex> vertices =
+        // std::vector<Vertex> vertices(std::begin(CONSTANTS::CUBE_MESH_VERTICES), std::end(CONSTANTS::CUBE_MESH_VERTICES));
+        
+        // std::vector<unsigned int> indices(std::begin(CONSTANTS::CUBE_MESH_INDICES), std::end(CONSTANTS::CUBE_MESH_INDICES));
+        std::vector<Vertex> vertices(std::begin(CONSTANTS::TETRAHEDRON_MESH_VERTICES), std::end(CONSTANTS::TETRAHEDRON_MESH_VERTICES));
+        
+        std::vector<unsigned int> indices(std::begin(CONSTANTS::TETRAHEDRON_MESH_INDICES), std::end(CONSTANTS::TETRAHEDRON_MESH_INDICES));
 
-            {{-0.5f,  0.5f, -0.5f},     {1, 1, 1, 1},      {0, 1, 0}},  // + Y face
-            {{ 0.5f,  0.5f, -0.5f},     {1, 1, 1, 1},      {0, 1, 0}},
-            {{ 0.5f,  0.5f,  0.5f},     {1, 1, 1, 1},      {0, 1, 0}},
-            {{-0.5f,  0.5f,  0.5f},     {1, 1, 1, 1},      {0, 1, 0}},
-
-            {{-0.5f, -0.5f, -0.5f},     {1, 1, 1, 1},      {-1, 0, 0}}, // - X face
-            {{-0.5f,  0.5f, -0.5f},     {1, 1, 1, 1},      {-1, 0, 0}},
-            {{-0.5f,  0.5f,  0.5f},     {1, 1, 1, 1},      {-1, 0, 0}},
-            {{-0.5f, -0.5f,  0.5f},     {1, 1, 1, 1},      {-1, 0, 0}},
-
-            {{0.5f, -0.5f, -0.5f},      {1, 1, 1, 1},      {1, 0, 0}}, // + X face
-            {{0.5f,  0.5f, -0.5f},      {1, 1, 1, 1},      {1, 0, 0}},
-            {{0.5f,  0.5f,  0.5f},      {1, 1, 1, 1},      {1, 0, 0}},
-            {{0.5f, -0.5f,  0.5f},      {1, 1, 1, 1},      {1, 0, 0}},
-
-            {{-0.5f, -0.5f, -0.5f},     {1, 1, 1, 1},      {0, 0, -1}}, // - Z face
-            {{-0.5f,  0.5f, -0.5f},     {1, 1, 1, 1},      {0, 0, -1}},
-            {{0.5f,  0.5f, -0.5f},      {1, 1, 1, 1},      {0, 0, -1}},
-            {{0.5f, -0.5f, -0.5f},      {1, 1, 1, 1},      {0, 0, -1}},
-
-            {{-0.5f, -0.5f,  0.5f},     {1, 1, 1, 1},      {0, 0, 1}}, // + Z face
-            {{-0.5f,  0.5f,  0.5f},     {1, 1, 1, 1},      {0, 0, 1}},
-            {{ 0.5f,  0.5f,  0.5f},     {1, 1, 1, 1},      {0, 0, 1}},
-            {{ 0.5f, -0.5f,  0.5f},     {1, 1, 1, 1},      {0, 0, 1}}
-        };
-        std::vector<unsigned int> indices = { 
-            0, 1, 2, 2, 3, 0, // - Y face
-            4, 6, 5, 4, 7, 6, // + Y face
-            8, 10, 9, 8, 11, 10, // - X face
-            12, 13, 14, 12, 14, 15, // + X face
-            16, 17, 18, 16, 18, 19, // - Z face
-            20, 22, 21, 20, 23, 22  // + Z face
-        };
 
         // std::vector<glm::mat4> model_matrices(m_instances);
         m_model_matrices = new std::vector<glm::mat4>(m_instances);
@@ -66,7 +35,7 @@ namespace test{
             for (int y = 0; y < 10; y++) {
                 for (int z = 0; z < 10; z++) {
                     glm::mat4 model = glm::mat4(1.0f);
-                    model = glm::translate(model, glm::vec3(x * 2.0f, y * 2.0f, -z * 2.0f));
+                    model = glm::translate(model, glm::vec3(x * 4.0f, y * 4.0f, -z * 4.0f));
                     m_model_matrices->at(x * 100 + y * 10 + z) = model;
                 }
             }
@@ -75,9 +44,6 @@ namespace test{
         m_cube.setData(vertices, indices, *m_model_matrices, m_instances);
 
         m_shader.setShader("multiple_cube.glsl");
-        m_shader.bind();
-        m_shader.setUniformVec4f("u_light_color", light_color);
-        m_shader.unbind();
 
         std::vector<Vertex> light_vertices = {
             {{-0.1f, -0.1f, -0.1f},     {0, 0, 0, 0},      {0, 0, 0}},   //0
@@ -110,8 +76,10 @@ namespace test{
         m_light.setPosition(m_light_start_pos);
 
         m_light_shader.setShader("light.glsl");
-        m_light_shader.bind();
-        m_light_shader.setUniformVec4f("u_light_color", light_color);
+
+        m_compute_shader.setComputeShader("compute.glsl");
+        m_compute_shader.bind();
+        m_compute_shader.unbind();
 
         GLCall(glViewport(0, 0, m_width, m_height));
         GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
