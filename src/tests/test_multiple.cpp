@@ -8,7 +8,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
-#include <omp.h>
+#include "constants.h"
 
 extern GLFWwindow * c_window;
 
@@ -18,45 +18,13 @@ namespace test{
         : m_camera(m_width, m_height, glm::vec3(0.0f, 0.0f, 3.0f)) {
 
         //Cube vertices
-        std::vector<Vertex> vertices = {
-            {{-0.5f, -0.5f, -0.5f},     {1, 1, 1, 1},      {0, -1, 0}}, // - Y face
-            {{ 0.5f, -0.5f, -0.5f},     {1, 1, 1, 1},      {0, -1, 0}},
-            {{ 0.5f, -0.5f,  0.5f},     {1, 1, 1, 1},      {0, -1, 0}},
-            {{-0.5f, -0.5f,  0.5f},     {1, 1, 1, 1},      {0, -1, 0}},
+        // std::vector<Vertex> vertices(std::begin(CONSTANTS::ICOSAHEDRON_MESH_VERTICES), std::end(CONSTANTS::ICOSAHEDRON_MESH_VERTICES));
+        
+        // std::vector<unsigned int> indices(std::begin(CONSTANTS::ICOSAHEDRON_MESH_INDICES), std::end(CONSTANTS::ICOSAHEDRON_MESH_INDICES));
 
-            {{-0.5f,  0.5f, -0.5f},     {1, 1, 1, 1},      {0, 1, 0}},  // + Y face
-            {{ 0.5f,  0.5f, -0.5f},     {1, 1, 1, 1},      {0, 1, 0}},
-            {{ 0.5f,  0.5f,  0.5f},     {1, 1, 1, 1},      {0, 1, 0}},
-            {{-0.5f,  0.5f,  0.5f},     {1, 1, 1, 1},      {0, 1, 0}},
-
-            {{-0.5f, -0.5f, -0.5f},     {1, 1, 1, 1},      {-1, 0, 0}}, // - X face
-            {{-0.5f,  0.5f, -0.5f},     {1, 1, 1, 1},      {-1, 0, 0}},
-            {{-0.5f,  0.5f,  0.5f},     {1, 1, 1, 1},      {-1, 0, 0}},
-            {{-0.5f, -0.5f,  0.5f},     {1, 1, 1, 1},      {-1, 0, 0}},
-
-            {{0.5f, -0.5f, -0.5f},      {1, 1, 1, 1},      {1, 0, 0}}, // + X face
-            {{0.5f,  0.5f, -0.5f},      {1, 1, 1, 1},      {1, 0, 0}},
-            {{0.5f,  0.5f,  0.5f},      {1, 1, 1, 1},      {1, 0, 0}},
-            {{0.5f, -0.5f,  0.5f},      {1, 1, 1, 1},      {1, 0, 0}},
-
-            {{-0.5f, -0.5f, -0.5f},     {1, 1, 1, 1},      {0, 0, -1}}, // - Z face
-            {{-0.5f,  0.5f, -0.5f},     {1, 1, 1, 1},      {0, 0, -1}},
-            {{0.5f,  0.5f, -0.5f},      {1, 1, 1, 1},      {0, 0, -1}},
-            {{0.5f, -0.5f, -0.5f},      {1, 1, 1, 1},      {0, 0, -1}},
-
-            {{-0.5f, -0.5f,  0.5f},     {1, 1, 1, 1},      {0, 0, 1}}, // + Z face
-            {{-0.5f,  0.5f,  0.5f},     {1, 1, 1, 1},      {0, 0, 1}},
-            {{ 0.5f,  0.5f,  0.5f},     {1, 1, 1, 1},      {0, 0, 1}},
-            {{ 0.5f, -0.5f,  0.5f},     {1, 1, 1, 1},      {0, 0, 1}}
-        };
-        std::vector<unsigned int> indices = { 
-            0, 1, 2, 2, 3, 0, // - Y face
-            4, 6, 5, 4, 7, 6, // + Y face
-            8, 10, 9, 8, 11, 10, // - X face
-            12, 13, 14, 12, 14, 15, // + X face
-            16, 17, 18, 16, 18, 19, // - Z face
-            20, 22, 21, 20, 23, 22  // + Z face
-        };
+        std::vector<Vertex> vertices(std::begin(CONSTANTS::SPHERE_MESH_VERTICES), std::end(CONSTANTS::SPHERE_MESH_VERTICES));
+        
+        std::vector<unsigned int> indices(std::begin(CONSTANTS::SPHERE_MESH_INDICES), std::end(CONSTANTS::SPHERE_MESH_INDICES));
 
         m_instances = 1000000;
         // std::vector<glm::mat4> model_matrices(m_instances);
@@ -67,7 +35,7 @@ namespace test{
             for (int y = 0; y < 100; y++) {
                 for (int z = 0; z < 100; z++) {
                     glm::mat4 model = glm::mat4(1.0f);
-                    model = glm::translate(model, glm::vec3(x * 4.0f, y * 4.0f, -z * 4.0f));
+                    model = glm::translate(model, glm::vec3(x * 10.0f, y * 10.0f, -z * 10.0f));
                     m_model_matrices->at(x * 10000 + y * 100 + z) = model;
                 }
             }
@@ -127,24 +95,18 @@ namespace test{
     TestMultiple::~TestMultiple(){
     }
 
-
     void TestMultiple::onUpdate(float deltaTime){
         // const glm::vec3 translation(0.01f, 0.0f, 0.0f);
         // int size = m_model_matrices->size();
 
-        //Move all the cubes to the right
-        // #pragma omp parallel for
+        // // Move all the cubes to the right
         // for (int i = 0; i < size; i++) {
         //     m_model_matrices->operator[](i) = glm::translate(m_model_matrices->operator[](i), translation);
         // }
-        // for (int i = 0; i < 1000000; i++) {
-        //     m_model_matrices->operator[](i) = glm::translate(m_model_matrices->operator[](i), translation);
-        // }
+
 
         // m_cube.updateModelMatrices(*m_model_matrices);
     }
-
-
 
     void TestMultiple::onRender(){
         Renderer renderer;
@@ -167,7 +129,6 @@ namespace test{
         renderer.instancedDraw(m_cube, m_shader, m_camera, m_instances);
         renderer.draw(m_light, m_light_shader, m_camera);
     }
-
 
     void TestMultiple::onImGuiRender(){
         ImGui::Text("Lightning test");

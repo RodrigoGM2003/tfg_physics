@@ -1,5 +1,5 @@
 #shader vertex
-#version 330 core
+#version 440 core
 
 layout(location = 0) in vec3 position;
 
@@ -29,11 +29,11 @@ void main(){
     gl_Position = u_cam_matrix * vec4(v_position, 1.0);
 
     v_normal = vec3(instance_model * vec4(normal, 0.0));
-    v_color = color;
+    v_color = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 };
 
 #shader fragment
-#version 330 core
+#version 440 core
 
 layout(location = 0) out vec4 color;
 

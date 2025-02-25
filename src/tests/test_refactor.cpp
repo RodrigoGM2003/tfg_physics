@@ -10,6 +10,8 @@
 
 #include "../shader.h"
 
+#include "constants.h"
+
 extern GLFWwindow * c_window;
 
 namespace test{
@@ -18,46 +20,12 @@ namespace test{
         : m_camera(m_width, m_height, glm::vec3(0.0f, 0.0f, 3.0f)) {
 
         //Cube vertices
-        std::vector<Vertex> vertices = {
-            {{-0.5f, -0.5f, -0.5f},     {1, 1, 1, 1},      {0, -1, 0}}, // - Y face
-            {{ 0.5f, -0.5f, -0.5f},     {1, 1, 1, 1},      {0, -1, 0}},
-            {{ 0.5f, -0.5f,  0.5f},     {1, 1, 1, 1},      {0, -1, 0}},
-            {{-0.5f, -0.5f,  0.5f},     {1, 1, 1, 1},      {0, -1, 0}},
-
-            {{-0.5f,  0.5f, -0.5f},     {1, 1, 1, 1},      {0, 1, 0}},  // + Y face
-            {{ 0.5f,  0.5f, -0.5f},     {1, 1, 1, 1},      {0, 1, 0}},
-            {{ 0.5f,  0.5f,  0.5f},     {1, 1, 1, 1},      {0, 1, 0}},
-            {{-0.5f,  0.5f,  0.5f},     {1, 1, 1, 1},      {0, 1, 0}},
-
-            {{-0.5f, -0.5f, -0.5f},     {1, 1, 1, 1},      {-1, 0, 0}}, // - X face
-            {{-0.5f,  0.5f, -0.5f},     {1, 1, 1, 1},      {-1, 0, 0}},
-            {{-0.5f,  0.5f,  0.5f},     {1, 1, 1, 1},      {-1, 0, 0}},
-            {{-0.5f, -0.5f,  0.5f},     {1, 1, 1, 1},      {-1, 0, 0}},
-
-            {{0.5f, -0.5f, -0.5f},     {1, 1, 1, 1},      {1, 0, 0}}, // + X face
-            {{0.5f,  0.5f, -0.5f},     {1, 1, 1, 1},      {1, 0, 0}},
-            {{0.5f,  0.5f,  0.5f},     {1, 1, 1, 1},      {1, 0, 0}},
-            {{0.5f, -0.5f,  0.5f},     {1, 1, 1, 1},      {1, 0, 0}},
-
-            {{-0.5f, -0.5f, -0.5f},     {1, 1, 1, 1},      {0, 0, -1}}, // - Z face
-            {{-0.5f,  0.5f, -0.5f},     {1, 1, 1, 1},      {0, 0, -1}},
-            {{0.5f,  0.5f, -0.5f},     {1, 1, 1, 1},      {0, 0, -1}},
-            {{0.5f, -0.5f, -0.5f},     {1, 1, 1, 1},      {0, 0, -1}},
-
-            {{-0.5f, -0.5f,  0.5f},     {1, 1, 1, 1},      {0, 0, 1}}, // + Z face
-            {{-0.5f,  0.5f,  0.5f},     {1, 1, 1, 1},      {0, 0, 1}},
-            {{ 0.5f,  0.5f,  0.5f},     {1, 1, 1, 1},      {0, 0, 1}},
-            {{ 0.5f, -0.5f,  0.5f},     {1, 1, 1, 1},      {0, 0, 1}}
-        };
-        std::vector<unsigned int> indices = { 
-            0, 1, 2, 2, 3, 0, // - Y face
-            4, 6, 5, 4, 7, 6, // + Y face
-            8, 10, 9, 8, 11, 10, // - X face
-            12, 13, 14, 12, 14, 15, // + X face
-            16, 17, 18, 16, 18, 19, // - Z face
-            20, 22, 21, 20, 23, 22  // + Z face
-        };
+        std::vector<Vertex> vertices(std::begin(CONSTANTS::SPHERE_MESH_VERTICES), std::end(CONSTANTS::SPHERE_MESH_VERTICES));
         
+        std::vector<unsigned int> indices(std::begin(CONSTANTS::SPHERE_MESH_INDICES), std::end(CONSTANTS::SPHERE_MESH_INDICES));
+
+
+
         // m_cube = Mesh(vertices, indices);
         m_cube.setData(vertices, indices);
         m_cube.setPosition(m_cube_start_pos);
@@ -66,6 +34,8 @@ namespace test{
         m_shader.bind();
         m_shader.setUniformVec4f("u_light_color", light_color);
         m_shader.unbind();
+
+
 
         std::vector<Vertex> light_vertices = {
             {{-0.1f, -0.1f, -0.1f},     {0, 0, 0, 0},      {0, 0, 0}},   //0
