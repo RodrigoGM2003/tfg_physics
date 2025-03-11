@@ -12,8 +12,6 @@
 #include "../shader.h"
 #include "../camera.h"
 #include "../meshes/mesh.h"
-#include "../meshes/instanced_mesh.h"
-#include "compute_shader.h"
 
 namespace test{
 
@@ -44,8 +42,6 @@ namespace test{
 
         float m_a = 0.01f;
         float m_b = 0.01f;
-
-        ComputeShader m_compute_shader;
 
     public:
         TestLights();

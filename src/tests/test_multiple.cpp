@@ -22,9 +22,9 @@ namespace test{
         
         // std::vector<unsigned int> indices(std::begin(CONSTANTS::ICOSAHEDRON_MESH_INDICES), std::end(CONSTANTS::ICOSAHEDRON_MESH_INDICES));
 
-        std::vector<Vertex> vertices(std::begin(CONSTANTS::SPHERE_MESH_VERTICES), std::end(CONSTANTS::SPHERE_MESH_VERTICES));
+        std::vector<Vertex> vertices(std::begin(CONSTANTS::CUBE_MESH_VERTICES), std::end(CONSTANTS::CUBE_MESH_VERTICES));
         
-        std::vector<unsigned int> indices(std::begin(CONSTANTS::SPHERE_MESH_INDICES), std::end(CONSTANTS::SPHERE_MESH_INDICES));
+        std::vector<unsigned int> indices(std::begin(CONSTANTS::CUBE_MESH_INDICES), std::end(CONSTANTS::CUBE_MESH_INDICES));
 
         m_instances = 1000000;
         // std::vector<glm::mat4> model_matrices(m_instances);
@@ -35,7 +35,7 @@ namespace test{
             for (int y = 0; y < 100; y++) {
                 for (int z = 0; z < 100; z++) {
                     glm::mat4 model = glm::mat4(1.0f);
-                    model = glm::translate(model, glm::vec3(x * 10.0f, y * 10.0f, -z * 10.0f));
+                    model = glm::translate(model, glm::vec3(x * 4.0f, y * 4.0f, -z * 4.0f));
                     m_model_matrices->at(x * 10000 + y * 100 + z) = model;
                 }
             }
@@ -99,7 +99,6 @@ namespace test{
         // const glm::vec3 translation(0.01f, 0.0f, 0.0f);
         // int size = m_model_matrices->size();
 
-        // // Move all the cubes to the right
         // for (int i = 0; i < size; i++) {
         //     m_model_matrices->operator[](i) = glm::translate(m_model_matrices->operator[](i), translation);
         // }

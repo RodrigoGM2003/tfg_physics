@@ -18,13 +18,9 @@ namespace test{
         : m_camera(m_width, m_height, glm::vec3(0.0f, 0.0f, 3.0f)) {
 
         //Cube vertices
-        // std::vector<Vertex> vertices =
-        // std::vector<Vertex> vertices(std::begin(CONSTANTS::CUBE_MESH_VERTICES), std::end(CONSTANTS::CUBE_MESH_VERTICES));
+        std::vector<Vertex> vertices(std::begin(CONSTANTS::ICOSAHEDRON_MESH_VERTICES), std::end(CONSTANTS::ICOSAHEDRON_MESH_VERTICES));
         
-        // std::vector<unsigned int> indices(std::begin(CONSTANTS::CUBE_MESH_INDICES), std::end(CONSTANTS::CUBE_MESH_INDICES));
-        std::vector<Vertex> vertices(std::begin(CONSTANTS::TETRAHEDRON_MESH_VERTICES), std::end(CONSTANTS::TETRAHEDRON_MESH_VERTICES));
-        
-        std::vector<unsigned int> indices(std::begin(CONSTANTS::TETRAHEDRON_MESH_INDICES), std::end(CONSTANTS::TETRAHEDRON_MESH_INDICES));
+        std::vector<unsigned int> indices(std::begin(CONSTANTS::ICOSAHEDRON_MESH_INDICES), std::end(CONSTANTS::ICOSAHEDRON_MESH_INDICES));
 
 
         // std::vector<glm::mat4> model_matrices(m_instances);
@@ -42,8 +38,17 @@ namespace test{
         }
         
         m_cube.setData(vertices, indices, *m_model_matrices, m_instances);
-
         m_shader.setShader("multiple_cube.glsl");
+
+
+
+        /*
+        m_simulator.setData(vertices, indices, *m_model_matrices, m_instances);
+
+        with vertices and indices we calculate the normals for Separete Axis Theorem
+
+        we store
+        */
 
         std::vector<Vertex> light_vertices = {
             {{-0.1f, -0.1f, -0.1f},     {0, 0, 0, 0},      {0, 0, 0}},   //0
@@ -77,10 +82,6 @@ namespace test{
 
         m_light_shader.setShader("light.glsl");
 
-        m_compute_shader.setComputeShader("compute.glsl");
-        m_compute_shader.bind();
-        m_compute_shader.unbind();
-
         GLCall(glViewport(0, 0, m_width, m_height));
         GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
         GLCall(glEnable(GL_DEPTH_TEST));
@@ -96,19 +97,15 @@ namespace test{
 
 
     void TestLights::onUpdate(float deltaTime){
-        // const glm::vec3 translation(0.01f, 0.0f, 0.0f);
-        // int size = m_model_matrices->size();
+        const glm::vec3 translation(0.01f, 0.0f, 0.0f);
 
-        //Move all the cubes to the right
-        // #pragma omp parallel for
-        // for (int i = 0; i < size; i++) {
-        //     m_model_matrices->operator[](i) = glm::translate(m_model_matrices->operator[](i), translation);
-        // }
-        // for (int i = 0; i < 1000000; i++) {
-        //     m_model_matrices->operator[](i) = glm::translate(m_model_matrices->operator[](i), translation);
-        // }
+        for (int i = 0; i < m_instances; i++) 
+            m_model_matrices->operator[](i) = glm::translate(m_model_matrices->operator[](i), translation);
+        
 
-        // m_cube.updateModelMatrices(*m_model_matrices);
+        // m_cube.updateModelMatrices();
+
+        // m_simulator.step();
     }
 
 
@@ -148,7 +145,7 @@ namespace test{
 
         ImGui::SliderFloat3("Light Position", &m_light.getPosition().x, -10.0f, 150.0f);
 
-        ImGui::SliderFloat("a", &m_a, 0.0f, 0.01f);
-        ImGui::SliderFloat("b", &m_b, 0.0f, 0.01f);
+        ImGui::SliderFloat("quadratic", &m_a, 0.0f, 0.01f);
+        ImGui::SliderFloat("linear", &m_b, 0.0f, 0.01f);
     }
 }

@@ -15,14 +15,14 @@
 #include "../shader.h"
 #include "../camera.h"
 
-
 class InstancedMesh{
-private:
+protected:
     unsigned int m_instances; // Number of instances
 
-    std::vector<Vertex> m_vertices; //Vertex data
-    std::vector<unsigned int> m_indices; //Vertex indices
-    std::vector<glm::mat4> m_model_matrices; //Model matrices
+    const std::vector<Vertex>* m_vertices; //Vertex data
+    const std::vector<unsigned int>* m_indices; //Vertex indices
+
+    const std::vector<glm::mat4>* m_model_matrices; 
 
     VertexArray m_va; //Vertex Array
     IndexBuffer m_ib; //Index Buffer
@@ -38,7 +38,7 @@ public:
      * @brief Update the model matrices
      * @param model_matrices the model matrices
      */
-    void updateModelMatrices(std::vector<glm::mat4>& model_matrices);
+    void updateModelMatrices();
 
     /**
      * @brief Get the vertex array
@@ -57,8 +57,8 @@ public:
      * @param model_matrices the model matrices
      * @param instances the number of instances
      */
-    void setData(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, 
-                std::vector<glm::mat4>& model_matrices, unsigned int instances);
+    void setData(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, 
+                const std::vector<glm::mat4>& model_matrices, unsigned int instances);
 
 private:
     /**
