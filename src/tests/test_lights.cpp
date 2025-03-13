@@ -18,9 +18,9 @@ namespace test{
         : m_camera(m_width, m_height, glm::vec3(0.0f, 0.0f, 3.0f)) {
 
         //Cube vertices
-        std::vector<Vertex> vertices(std::begin(CONSTANTS::ICOSAHEDRON_MESH_VERTICES), std::end(CONSTANTS::ICOSAHEDRON_MESH_VERTICES));
+        m_vertices = std::vector<Vertex>(std::begin(CONSTANTS::CUBE_MESH_VERTICES), std::end(CONSTANTS::CUBE_MESH_VERTICES));
         
-        std::vector<unsigned int> indices(std::begin(CONSTANTS::ICOSAHEDRON_MESH_INDICES), std::end(CONSTANTS::ICOSAHEDRON_MESH_INDICES));
+        m_indices = std::vector<unsigned int>(std::begin(CONSTANTS::CUBE_MESH_INDICES), std::end(CONSTANTS::CUBE_MESH_INDICES));
 
 
         // std::vector<glm::mat4> model_matrices(m_instances);
@@ -37,10 +37,11 @@ namespace test{
             }
         }
         
-        m_cube.setData(vertices, indices, *m_model_matrices, m_instances);
+        m_cube.setData(m_vertices, m_indices, *m_model_matrices, m_instances);
         m_shader.setShader("multiple_cube.glsl");
 
 
+        m_simulator = new Simulator(m_model_matrices, &m_vertices, &m_indices);
 
         /*
         m_simulator.setData(vertices, indices, *m_model_matrices, m_instances);
@@ -96,16 +97,15 @@ namespace test{
     }
 
 
-    void TestLights::onUpdate(float deltaTime){
-        const glm::vec3 translation(0.01f, 0.0f, 0.0f);
+    void TestLights::onUpdate(float delta_time){
+        // const glm::vec3 translation(0.01f, 0.0f, 0.0f);
 
-        for (int i = 0; i < m_instances; i++) 
-            m_model_matrices->operator[](i) = glm::translate(m_model_matrices->operator[](i), translation);
+        // for (int i = 0; i < m_instances; i++) 
+        //     m_model_matrices->operator[](i) = glm::translate(m_model_matrices->operator[](i), translation);
         
 
-        // m_cube.updateModelMatrices();
-
-        // m_simulator.step();
+        m_simulator->update(delta_time * m_time_factor);
+        m_cube.updateModelMatrices();
     }
 
 
@@ -147,5 +147,7 @@ namespace test{
 
         ImGui::SliderFloat("quadratic", &m_a, 0.0f, 0.01f);
         ImGui::SliderFloat("linear", &m_b, 0.0f, 0.01f);
+
+        ImGui::SliderFloat("Time factor", &m_time_factor, 0.0f, 10.0f);
     }
 }

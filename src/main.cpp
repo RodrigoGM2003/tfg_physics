@@ -132,9 +132,20 @@ void mainLoop(){
     test_menu->registerTest<test::TestLights>("Lights");
 
 
+    double last_frame_time = glfwGetTime();
+    float delta_time = 0.0f;
+
     //Check for program termination
     while ( !terminate_program )
     {
+        double current_frame_time = glfwGetTime();
+        delta_time = static_cast<float>(current_frame_time - last_frame_time);
+        last_frame_time = current_frame_time;
+
+        // Cap delta time to prevent "spiral of death" with very low framerates
+        if (delta_time > 0.25f)
+            delta_time = 0.25f;
+
         //Set the viewport
         // GLCall(glViewport(0, 0, w_width, w_height));
         GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
@@ -146,7 +157,7 @@ void mainLoop(){
         ImGui::NewFrame();
 
         if (current_test){
-            current_test->onUpdate(0.0f);
+            current_test->onUpdate(delta_time);
             current_test->onRender();
             ImGui::Begin("Test");
             if (current_test != test_menu && ImGui::Button("<-")){

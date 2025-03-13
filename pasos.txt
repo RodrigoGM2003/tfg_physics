@@ -1,0 +1,15 @@
+pasos update:
+
+primero movemos los cuerpos
+Todos los cuerpos tienen los mismos vertices (misma geometria)
+
+
+reconstruimos el bvh
+
+sacamos las colisiones potenciales (broad phase)
+
+sacamos las colisiones reales (narrow phase)
+
+resolvemos las colisiones
+
+fin

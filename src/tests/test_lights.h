@@ -12,6 +12,7 @@
 #include "../shader.h"
 #include "../camera.h"
 #include "../meshes/mesh.h"
+#include "simulator.h"
 
 namespace test{
 
@@ -33,12 +34,18 @@ namespace test{
         Shader m_shader;
         Shader m_light_shader;
 
+        float m_time_factor = 1.0f;
+
+        std::vector<Vertex> m_vertices;
+        std::vector<unsigned int> m_indices;
         InstancedMesh m_cube;
         Mesh m_light;
 
         Camera m_camera;
 
         std::vector<glm::mat4> m_cube_models;
+
+        Simulator* m_simulator;
 
         float m_a = 0.01f;
         float m_b = 0.01f;
