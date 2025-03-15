@@ -29,7 +29,7 @@ namespace test{
 
         std::vector<glm::mat4>* m_model_matrices;
 
-        glm::vec4 light_color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+        glm::vec4 light_color = glm::vec4(0.595f, 0.558f, 0.429f, 1.0f);
 
         Shader m_shader;
         Shader m_light_shader;

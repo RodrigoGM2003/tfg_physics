@@ -7,6 +7,8 @@
 #include <vector>
 
 #include "glm/glm.hpp"
+#include "glm/gtc/quaternion.hpp"
+
 
 #include "../buffers/vertex_buffer.h"
 #include "../buffers/index_buffer.h"

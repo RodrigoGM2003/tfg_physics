@@ -18,9 +18,10 @@ namespace test{
         : m_camera(m_width, m_height, glm::vec3(0.0f, 0.0f, 3.0f)) {
 
         //Cube vertices
-        m_vertices = std::vector<Vertex>(std::begin(CONSTANTS::CUBE_MESH_VERTICES), std::end(CONSTANTS::CUBE_MESH_VERTICES));
+        m_vertices = std::vector<Vertex>(std::begin(CONSTANTS::DODECAHEDRON_MESH_VERTICES), std::end(CONSTANTS::DODECAHEDRON_MESH_VERTICES));
         
-        m_indices = std::vector<unsigned int>(std::begin(CONSTANTS::CUBE_MESH_INDICES), std::end(CONSTANTS::CUBE_MESH_INDICES));
+        m_indices = std::vector<unsigned int>(std::begin(CONSTANTS::DODECAHEDRON_MESH_INDICES), std::end(CONSTANTS::DODECAHEDRON_MESH_INDICES));
+
 
 
         // std::vector<glm::mat4> model_matrices(m_instances);
@@ -94,6 +95,9 @@ namespace test{
     }
 
     TestLights::~TestLights(){
+        delete m_simulator;
+        delete m_model_matrices;
+
     }
 
 

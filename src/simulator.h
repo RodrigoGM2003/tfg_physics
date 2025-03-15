@@ -8,36 +8,42 @@
 #include "glm/glm.hpp"
 #include "vertex_buffer.h"
 
-struct PhysicsProperties{
-    glm::vec3 velocity;
-    glm::vec3 acceleration;
+#include "utils.h"
 
-    glm::vec3 angular_velocity;
-    glm::vec3 angular_acceleration;
-};
-
-
-struct SimObject{
-    glm::mat4* transform;
-    
-    std::vector<Vertex> collision_vertices;
-    
-    PhysicsProperties physics;
-};
-
+/**
+ * @brief class representation of a simulator running on the cpu
+ */
 class Simulator{
 private:
-    std::vector<glm::mat4>* sim_transforms; 
+    std::vector<glm::mat4>* sim_transforms; /* Transform matrices for each object */
     const std::vector<Vertex>* sim_static_vertices; //Vertex data
     const std::vector<unsigned int>* sim_static_indices; //Vertex indices
 
-    std::vector<SimObject> sim_objects;
+    std::vector<physics::Object> sim_objects; /* Vector containing each object in the simulation */
 public:
+    /**
+     * @brief Constructor
+     * @param transforms pointer to the transform matrix of the objects
+     * @param static_vertices pointer to the original vertices of the geometry
+     * @param static_indices pointer to the order in which each triangle is being drawn
+     */
     Simulator(std::vector<glm::mat4>* transforms, const std::vector<Vertex>* static_vertices, const std::vector<unsigned int>* static_indices);
+    
+    /**
+     * @brief class destroyer. The memory is not dereferenced.
+     */
     ~Simulator();
 
+    /**
+     * @brief take a step on the simulation accounting for delta_time seconds
+     */
     void update(float delta_time);
-    void updateObject(SimObject& object, float delta_time);
+
+private:
+    /**
+     * @brief take a step for each object
+     */
+    void updateObject(physics::Object& object, float delta_time);
 };
 
 
