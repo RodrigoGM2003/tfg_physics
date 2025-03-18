@@ -15,21 +15,21 @@ namespace physics{
      * @brief Axis Aligned Bounding Box
      */
     struct AABB {
-        glm::vec3 min;
-        glm::vec3 max;
-        glm::vec3 center;
-        glm::vec3 extents; 
+        alignas(16) glm::vec3 min;
+        alignas(16) glm::vec3 max;
+        alignas(16) glm::vec3 center;
+        alignas(16) glm::vec3 extents; 
     };
 
     /**
      * @brief Physics properties of an object
      */
     struct Properties{
-        glm::vec3 velocity;
-        glm::vec3 acceleration;
+        alignas(16) glm::vec3 velocity;
+        alignas(16) glm::vec3 acceleration;
 
-        glm::vec3 angular_velocity;
-        glm::vec3 angular_acceleration;
+        alignas(16) glm::vec3 angular_velocity;
+        alignas(16) glm::vec3 angular_acceleration;
     };
 
     /**
@@ -41,9 +41,19 @@ namespace physics{
         
         AABB aabb; /* Static axis aligned bounding box (for broad phase collision detection) */
 
-        glm::vec3 scale; /* Scale of the object */
-
         Properties physics; /* Physical properties of an object*/
+    };
+
+    /**
+     * @brief Representation of an object using gpu
+     */
+    struct GpuObject{
+        glm::mat4* transform; /* Transformation matrix of the object */
+        const std::vector<Vertex>* static_vertices; /* Non-transformed vertices */
+        
+        AABB* aabb; /* Static axis aligned bounding box (for broad phase collision detection) */
+
+        Properties* physics; /* Physical properties of an object*/
     };
 }
 

@@ -1,5 +1,5 @@
-#ifndef TEST_LIGHTS_H
-#define TEST_LIGHTS_H
+#ifndef TEST_COMPUTE_SADER_H
+#define TEST_COMPUTE_SADER_H
 
 #pragma once
 
@@ -12,16 +12,16 @@
 #include "../shader.h"
 #include "../camera.h"
 #include "../meshes/mesh.h"
-#include "../simulators/simulator.h"
+#include "../simulators/gpu_simulator.h"
 
 namespace test{
 
-    class TestLights : public Test{
+    class TestComputeShader : public Test{
     private:
         const unsigned int m_width = 800;
         const unsigned int m_height = 800;
 
-        unsigned int m_instances = 1000;
+        unsigned int m_instances = 500000;
 
         //Add cube pos 
         glm::vec3 m_cube_start_pos = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -45,14 +45,14 @@ namespace test{
 
         std::vector<glm::mat4> m_cube_models;
 
-        Simulator* m_simulator;
+        Simulable* m_simulator;
 
         float m_a = 0.01f;
         float m_b = 0.01f;
 
     public:
-        TestLights();
-        ~TestLights();
+        TestComputeShader();
+        ~TestComputeShader();
 
         void onUpdate(float deltaTime) override;
         void onRender() override;
@@ -62,4 +62,4 @@ namespace test{
 }
 
 
-#endif // TEST_LIGHTS_H
+#endif // TEST_COMPUTE_SADER_H

@@ -31,13 +31,11 @@ namespace utils{
         return {glm::length(glm::vec3(matrix[0])), glm::length(glm::vec3(matrix[1])), glm::length(glm::vec3(matrix[2]))};
     }
 
-    physics::AABB updateObjectAABB(const physics::Object& object){
-        physics::AABB result = object.aabb;
-        // Extract position from transform matrix
-        glm::vec3 position = glm::vec3((*object.transform)[3]);
+    physics::AABB updateAABB(const physics::AABB& aabb, const glm::mat4* transform){
+        physics::AABB result = aabb;         
     
         // Update AABB center position
-        result.center = position;
+        result.center = glm::vec3((*transform)[3]);
     
         // Recalculate min and max based on center and extents
         result.min = result.center - result.extents;

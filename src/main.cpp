@@ -21,6 +21,7 @@
 #include "tests/test_refactor.h"
 #include "tests/test_multiple.h"
 #include "tests/test_lights.h"
+#include "tests/test_compute_shader.h"
 
 //Global variables
 GLFWwindow * c_window = nullptr; /*Main Window*/
@@ -130,6 +131,7 @@ void mainLoop(){
     test_menu->registerTest<test::TestRefactor>("Refactor");
     test_menu->registerTest<test::TestMultiple>("Multiple");
     test_menu->registerTest<test::TestLights>("Lights");
+    test_menu->registerTest<test::TestComputeShader>("ComputeShader");
 
 
     double last_frame_time = glfwGetTime();

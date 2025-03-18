@@ -28,13 +28,11 @@ Simulator::Simulator(
         object.transform = &sim_transforms->at(i);
         object.static_vertices = sim_static_vertices;
 
-        object.scale = utils::scaleFromTransform(*object.transform);
-
         object.aabb = base_aabb;
-        object.aabb.extents *= object.scale;
+        object.aabb.extents *= utils::scaleFromTransform(*object.transform);
         float max_extent = std::max(std::max(object.aabb.extents.x, object.aabb.extents.y), object.aabb.extents.z);
         object.aabb.extents = glm::vec3(max_extent * 1.01f);
-        object.aabb = utils::updateObjectAABB(object);
+        object.aabb = utils::updateAABB(object.aabb, object.transform);
 
         object.physics.velocity = glm::linearRand(glm::vec3(-0.05f), glm::vec3(0.05f));
         object.physics.acceleration = glm::vec3(0.0f);
@@ -97,5 +95,5 @@ void Simulator::updateObject(physics::Object& object, float delta_time){
     // Update transform
     *object.transform = new_transform;
 
-    object.aabb = utils::updateObjectAABB(object);
+    object.aabb = utils::updateAABB(object.aabb, object.transform);
 }

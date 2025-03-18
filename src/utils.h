@@ -31,10 +31,11 @@ namespace utils{
 
     /**
      * @brief Calculate the objects updated AABB
-     * @param object the simulation object we want to update
+     * @param aabb the original bounding box to update
+     * @param transform a pointer to a transform matrix
      * @return The updated AABB
      */
-    physics::AABB updateObjectAABB(const physics::Object& object);
+    physics::AABB updateAABB(const physics::AABB& aabb, const glm::mat4* transform);
 
 }
 

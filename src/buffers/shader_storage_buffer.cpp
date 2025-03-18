@@ -3,6 +3,8 @@
 
 #include <iostream>
 
+std:: unordered_set<unsigned int> ShaderStorageBuffer::taken_binding_points;
+
 ShaderStorageBuffer::ShaderStorageBuffer(const void *data, unsigned int size, const unsigned int usage){
     this->setBuffer(data, size, usage);
 }

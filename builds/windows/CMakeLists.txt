@@ -53,17 +53,20 @@ file(GLOB unidades
     ${carpeta_fuentes}/meshes/*.cpp
     ${carpeta_fuentes}/buffers/*.cpp
     ${carpeta_fuentes}/tests/*.cpp
+    ${carpeta_fuentes}/simulators/*.cpp
 )
 file(GLOB cabeceras 
     ${carpeta_fuentes}/*.h
     ${carpeta_fuentes}/meshes/*.h
     ${carpeta_fuentes}/buffers/*.h
     ${carpeta_fuentes}/tests/*.h
+    ${carpeta_fuentes}/simulators/*.h
 )
 include_directories(
     ${carpeta_fuentes} 
     ${carpeta_fuentes}/buffers 
     ${carpeta_fuentes}/meshes
+    ${carpeta_fuentes}/simulators
 )
 
 add_executable(${nombre_ejecutable} ${unidades} ${cabeceras} ${IMGUI_SOURCES} ${TESTS_SOURCES})

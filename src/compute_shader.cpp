@@ -39,6 +39,9 @@ void ComputeShader::unbind() const {
 void ComputeShader::dispatch(unsigned int num_groups_x, unsigned int num_groups_y, unsigned int num_groups_z) const {
     GLCall(glDispatchCompute(num_groups_x, num_groups_y, num_groups_z));
 }
+void ComputeShader::use() const {
+    GLCall(glUseProgram(m_renderer_id));
+}
 
 void ComputeShader::waitForCompletion(unsigned int barrier) const {
     GLCall(glMemoryBarrier(barrier));

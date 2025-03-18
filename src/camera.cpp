@@ -1,8 +1,8 @@
 #include "camera.h"
 
 
-const float Camera::C_DEFAULT_SPEED = 0.05f;
-const float Camera::C_DEFAULT_SPRINT_SPEED = 0.2f;
+const float Camera::C_DEFAULT_SPEED = 0.5f;
+const float Camera::C_DEFAULT_SPRINT_SPEED = 2.0f;
 
 Camera::Camera(int width, int height, const glm::vec3& position)
     : m_position(position), m_width(width), m_height(height) {}

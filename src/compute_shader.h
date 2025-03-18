@@ -53,6 +53,11 @@ public:
     void dispatch(unsigned int num_groups_x, unsigned int num_groups_y, unsigned int num_groups_z) const;
 
     /**
+     * @brief Uses the shader
+     */
+    void use() const;
+
+    /**
      * @brief Waits for compute shader to finish
      * @param barrier barrier to wait for
      */
