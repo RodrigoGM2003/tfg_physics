@@ -12,6 +12,7 @@
 #include "../shader.h"
 #include "../camera.h"
 #include "../meshes/mesh.h"
+#include "../meshes/gpu_mesh.h"
 #include "../simulators/gpu_simulator.h"
 
 namespace test{
@@ -21,7 +22,7 @@ namespace test{
         const unsigned int m_width = 800;
         const unsigned int m_height = 800;
 
-        unsigned int m_instances = 500000;
+        unsigned int m_instances = 1000000;
 
         //Add cube pos 
         glm::vec3 m_cube_start_pos = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -38,7 +39,7 @@ namespace test{
 
         std::vector<Vertex> m_vertices;
         std::vector<unsigned int> m_indices;
-        InstancedMesh m_cube;
+        GpuMesh m_cube;
         Mesh m_light;
 
         Camera m_camera;

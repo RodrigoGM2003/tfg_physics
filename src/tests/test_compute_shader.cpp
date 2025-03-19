@@ -27,11 +27,11 @@ namespace test{
         // std::vector<glm::mat4> model_matrices(m_instances);
         m_model_matrices = new std::vector<glm::mat4>(m_instances);
 
-        int grid_x = 79;  // ~500,000 cubes total
-        int grid_y = 79;
-        int grid_z = 80;
+        int grid_x = 100; // Example: 2,000,000 objects
+        int grid_y = 100;
+        int grid_z = 100;
 
-        float spacing = 4.0f;  // Adjust this if needed
+        float spacing = 4.0f;
 
         for (int x = 0; x < grid_x; x++) {
             for (int y = 0; y < grid_y; y++) {
@@ -44,18 +44,11 @@ namespace test{
         }
         
         m_cube.setData(m_vertices, m_indices, *m_model_matrices, m_instances);
-        m_shader.setShader("multiple_cube.glsl");
+        m_shader.setShader("gpu_renderer.glsl");
 
 
         m_simulator = new GpuSimulator(m_model_matrices, &m_vertices, &m_indices);
 
-        /*
-        m_simulator.setData(vertices, indices, *m_model_matrices, m_instances);
-
-        with vertices and indices we calculate the normals for Separete Axis Theorem
-
-        we store
-        */
 
         std::vector<Vertex> light_vertices = {
             {{-0.1f, -0.1f, -0.1f},     {0, 0, 0, 0},      {0, 0, 0}},   //0
@@ -114,7 +107,7 @@ namespace test{
         
 
         m_simulator->update(delta_time * m_time_factor);
-        m_cube.updateModelMatrices();
+        // m_cube.updateModelMatrices();
     }
 
 
@@ -136,7 +129,7 @@ namespace test{
         m_light_shader.setUniformVec4f("u_light_color", light_color);
 
         //Draw the cube
-        renderer.instancedDraw(m_cube, m_shader, m_camera, m_instances);
+        renderer.instancedDraw(m_cube.getVertexArray(), m_cube.getIndexBuffer(), m_shader, m_camera, m_instances);
         renderer.draw(m_light, m_light_shader, m_camera);
     }
 

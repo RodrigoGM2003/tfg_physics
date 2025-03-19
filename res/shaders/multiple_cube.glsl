@@ -23,6 +23,8 @@ out vec4 v_color;
 
 void main(){
     mat4 instance_model = mat4(instance_matrix_1, instance_matrix_2, instance_matrix_3, instance_matrix_4);
+    // mat4 instance_model = transforms[gl_InstanceID];
+
 
     v_position = vec3(instance_model * vec4(position, 1.0));
 

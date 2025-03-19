@@ -57,3 +57,16 @@ void Renderer::instancedDraw(const InstancedMesh& instanced_mesh, Shader& shader
     instanced_mesh.getIndexBuffer().bind();
     GLCall(glDrawElementsInstanced(GL_TRIANGLES, instanced_mesh.getIndexBuffer().getCount(), GL_UNSIGNED_INT, nullptr, instances));
 }
+void Renderer::instancedDraw(const VertexArray& vertex_array, const IndexBuffer& index_buffer, Shader& shader, Camera& camera, unsigned int instances){
+    //Bind the shader
+    shader.bind();
+
+    shader.setUniformVec3f("u_cam_pos", camera.getPosition());
+
+    camera.matrix(shader, "u_cam_matrix");
+
+    //Draw the mesh
+    vertex_array.bind();
+    index_buffer.bind();
+    GLCall(glDrawElementsInstanced(GL_TRIANGLES, index_buffer.getCount(), GL_UNSIGNED_INT, nullptr, instances));
+}

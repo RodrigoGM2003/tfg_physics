@@ -74,6 +74,7 @@ public:
      * @param shader the shader
      */
     void instancedDraw(const InstancedMesh& instanced_mesh, Shader& shader, Camera& camera, unsigned int instances = 1);
+    void instancedDraw(const VertexArray& vertex_array, const IndexBuffer& index_buffer, Shader& shader, Camera& camera, unsigned int instances = 1);
 
 };
 

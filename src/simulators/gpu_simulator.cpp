@@ -47,7 +47,6 @@ GpuSimulator::GpuSimulator(
         
         object.physics = &sim_properties[i];
         sim_objects.push_back(object);
-
     }
 
     //COMPUTE SHADER
@@ -64,6 +63,10 @@ GpuSimulator::GpuSimulator(
     m_aabbs_ssbo.unbind();
 
     // m_transform_ssbo.bindToBindingPoint(1);
+
+    m_transform_ssbo.bindToBindingPoint(1);
+    m_properties_ssbo.bindToBindingPoint(2);
+    m_aabbs_ssbo.bindToBindingPoint(3);
 }
 
 GpuSimulator::~GpuSimulator(){
@@ -75,68 +78,13 @@ GpuSimulator::~GpuSimulator(){
 
 void GpuSimulator::update(float delta_time){
 
-    m_transform_ssbo.bind();
-    m_transform_ssbo.bindToBindingPoint(1);
-    m_transform_ssbo.unbind();
-
-    m_properties_ssbo.bind();
-    m_properties_ssbo.bindToBindingPoint(2);
-    m_properties_ssbo.unbind();
-
-    m_aabbs_ssbo.bind();
-    m_aabbs_ssbo.bindToBindingPoint(3);
-    m_aabbs_ssbo.unbind();
-
     m_shader.bind();
     m_shader.use();
-
     m_shader.setUniform1f("delta_time", delta_time);
 
     int work_gropus = (sim_transforms->size() + 256 - 1) / 256;
-
     m_shader.dispatch(work_gropus, 1, 1);
-
-
     m_shader.waitForCompletion(GL_SHADER_STORAGE_BARRIER_BIT);
-
-    {
-        m_transform_ssbo.bind();
-        glm::mat4* result_transforms = (glm::mat4*)m_transform_ssbo.readData();
-
-        size_t size_in_bytes = sim_transforms->size() * sizeof(glm::mat4);
-        memcpy(sim_transforms->data(), result_transforms, size_in_bytes);
-
-        m_transform_ssbo.unmapBuffer();
-        m_transform_ssbo.unbind();
-    }
-    
-    // {
-    //     m_properties_ssbo.bind();
-    //     glm::mat4* result_properties = (glm::mat4*)m_properties_ssbo.readData();
-
-    //     size_t size_in_bytes = sim_properties.size() * sizeof(glm::mat4);
-    //     memcpy(sim_properties.data(), result_properties, size_in_bytes);
-
-    //     m_properties_ssbo.unmapBuffer();
-    //     m_properties_ssbo.unbind();
-    // }
-
-
-    // {
-    //     m_aabbs_ssbo.bind();
-    //     glm::mat4* result_aabbs = (glm::mat4*)m_aabbs_ssbo.readData();
-
-    //     size_t size_in_bytes = sim_aabbs.size() * sizeof(glm::mat4);
-    //     memcpy(sim_aabbs.data(), result_aabbs, size_in_bytes);
-
-    //     m_aabbs_ssbo.unmapBuffer();
-    //     m_aabbs_ssbo.unbind();
-    // }
-
-
-    m_transform_ssbo.unbindFromBindingPoint();
-    m_properties_ssbo.unbindFromBindingPoint();
-    m_aabbs_ssbo.unbindFromBindingPoint();
 }
 
 void GpuSimulator::updateObject(physics::GpuObject& object, float delta_time){

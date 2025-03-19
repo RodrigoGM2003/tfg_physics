@@ -61,30 +61,33 @@ mat3 updateRotation(mat3 R, vec3 omega, float dt) {
 void main() {
     uint gid = gl_GlobalInvocationID.x;
     
-    // Early exit - move this before any computation
+    // Early exit
     if (gid >= transforms.length()) return;
     
-    // Cache property data - read once
+    // Cache all data we need in registers
+    mat4 transform = transforms[gid];
     PropertiesStruct prop = properties[gid];
     vec3 velocity = prop.velocity.xyz;
     vec3 angular_vel = prop.angular_velocity.xyz;
     
-    // Extract transform components
-    mat4 transform = transforms[gid];
+    // Update position with simple integration
     vec3 position = transform[3].xyz;
-    mat3 rotation = mat3(
-        transform[0].xyz,
-        transform[1].xyz,
-        transform[2].xyz
-    );
-    
-    // Update position (simple integration)
     vec3 new_position = position + velocity * delta_time;
     
-    // Update rotation using optimized method
-    mat3 new_rotation = updateRotation(rotation, angular_vel, delta_time);
+    // Optimized rotation update
+    mat3 rotation = mat3(transform);
+    float omega_len = length(angular_vel);
     
-    // Rebuild transform matrix efficiently
+    mat3 new_rotation;
+    if (omega_len * delta_time < 0.0001) {
+        // Ultra-fast path for very small rotations
+        new_rotation = rotation;
+    } else {
+        // Use the optimized rotation update
+        new_rotation = updateRotation(rotation, angular_vel, delta_time);
+    }
+    
+    // Write back transform in one operation
     transforms[gid] = mat4(
         vec4(new_rotation[0], 0.0),
         vec4(new_rotation[1], 0.0),
@@ -92,12 +95,9 @@ void main() {
         vec4(new_position, 1.0)
     );
     
-    // Efficient AABB update - only update what's needed
-    AABBStruct aabb = aabbs[gid];
-    vec3 center = new_position;
-    vec3 extents = aabb.extents.xyz;
-    
-    aabbs[gid].center.xyz = center;
-    aabbs[gid].min.xyz = center - extents;
-    aabbs[gid].max.xyz = center + extents;
+    // Update AABB efficiently (minimal calculations)
+    vec3 extents = aabbs[gid].extents.xyz;
+    aabbs[gid].center.xyz = new_position;
+    aabbs[gid].min.xyz = new_position - extents;
+    aabbs[gid].max.xyz = new_position + extents;
 }
