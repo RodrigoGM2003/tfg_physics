@@ -15,6 +15,13 @@ public:
     float color[4];
     float normal[3];
 };
+
+struct SimpleVertex{
+    public:
+        float position[3];
+        float normal[3];
+    };
+       
     
 
 class VertexBuffer{

@@ -20,6 +20,12 @@ namespace utils{
      * @return The AABB of the vertices
      */
     physics::AABB calculateAABB(const std::vector<Vertex>& vertices);
+    /**
+     * @brief Calculate the AABB of a set of vertices
+     * @param vertices The vertices
+     * @return The AABB of the vertices
+     */
+    physics::AABB calculateAABB(const std::vector<SimpleVertex>& vertices);
 
     /**
      * @brief Get the scale from a transformation matrix

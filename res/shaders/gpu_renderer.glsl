@@ -2,12 +2,16 @@
 #version 440 core
 
 layout(location = 0) in vec3 position;
-layout(location = 1) in vec4 color;
-layout(location = 2) in vec3 normal;
+layout(location = 1) in vec3 normal;
 
 // Shared SSBO with compute shader - use the same binding point (1)
 layout(std430, binding = 1) buffer TransformBuffer {
     mat4 transforms[];
+};
+
+// Shared SSBO with compute shader - use the same binding point (1)
+layout(std430, binding = 10) buffer ColorBuffer {
+    vec4 colors[];
 };
 
 uniform mat4 u_cam_matrix;
@@ -33,7 +37,7 @@ void main() {
     v_normal = normalMatrix * normal;
     
     // Use constant color from uniform (or keep using attribute if needed)
-    v_color = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    v_color = colors[gl_InstanceID];
 }
 
 #shader fragment

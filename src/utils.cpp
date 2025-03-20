@@ -19,10 +19,31 @@ namespace utils{
         aabb.extents = (aabb.max - aabb.min) / 2.0f;
         aabb.center = aabb.min + aabb.extents;
 
-        std::cout<<"AABB min: "<<aabb.min.x<<", "<<aabb.min.y<<", "<<aabb.min.z<<std::endl;
-        std::cout<<"AABB max: "<<aabb.max.x<<", "<<aabb.max.y<<", "<<aabb.max.z<<std::endl;
-        std::cout<<"AABB center: "<<aabb.center.x<<", "<<aabb.center.y<<", "<<aabb.center.z<<std::endl;
-        std::cout<<"AABB extents: "<<aabb.extents.x<<", "<<aabb.extents.y<<", "<<aabb.extents.z<<std::endl;
+        // std::cout<<"AABB min: "<<aabb.min.x<<", "<<aabb.min.y<<", "<<aabb.min.z<<std::endl;
+        // std::cout<<"AABB max: "<<aabb.max.x<<", "<<aabb.max.y<<", "<<aabb.max.z<<std::endl;
+        // std::cout<<"AABB center: "<<aabb.center.x<<", "<<aabb.center.y<<", "<<aabb.center.z<<std::endl;
+        // std::cout<<"AABB extents: "<<aabb.extents.x<<", "<<aabb.extents.y<<", "<<aabb.extents.z<<std::endl;
+
+        return aabb;
+    }
+    physics::AABB calculateAABB(const std::vector<SimpleVertex>& vertices){
+        physics::AABB aabb;
+        aabb.min = glm::vec3(FLT_MAX);
+        aabb.max = glm::vec3(-FLT_MAX);
+
+        for (const auto& vertex : vertices){
+            const glm::vec3 position = {vertex.position[0], vertex.position[1], vertex.position[2]};
+            aabb.min = glm::min(aabb.min, position);
+            aabb.max = glm::max(aabb.max, position);
+        }
+
+        aabb.extents = (aabb.max - aabb.min) / 2.0f;
+        aabb.center = aabb.min + aabb.extents;
+
+        // std::cout<<"AABB min: "<<aabb.min.x<<", "<<aabb.min.y<<", "<<aabb.min.z<<std::endl;
+        // std::cout<<"AABB max: "<<aabb.max.x<<", "<<aabb.max.y<<", "<<aabb.max.z<<std::endl;
+        // std::cout<<"AABB center: "<<aabb.center.x<<", "<<aabb.center.y<<", "<<aabb.center.z<<std::endl;
+        // std::cout<<"AABB extents: "<<aabb.extents.x<<", "<<aabb.extents.y<<", "<<aabb.extents.z<<std::endl;
 
         return aabb;
     }

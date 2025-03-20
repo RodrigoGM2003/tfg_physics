@@ -1,6 +1,8 @@
 #include "test_compute_shader.h"
 #include "../renderer.h"
 
+#include <random>
+
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -17,22 +19,34 @@ namespace test{
     TestComputeShader::TestComputeShader()
         : m_camera(m_width, m_height, glm::vec3(0.0f, 0.0f, 3.0f)) {
 
-        //Cube vertices
-        m_vertices = std::vector<Vertex>(std::begin(CONSTANTS::CUBE_MESH_VERTICES), std::end(CONSTANTS::CUBE_MESH_VERTICES));
-        
+        // Cube vertices
+        m_vertices = std::vector<SimpleVertex>(std::begin(CONSTANTS::CUBE_MESH_SIMPLE_VERTICES), std::end(CONSTANTS::CUBE_MESH_SIMPLE_VERTICES));
+    
         m_indices = std::vector<unsigned int>(std::begin(CONSTANTS::CUBE_MESH_INDICES), std::end(CONSTANTS::CUBE_MESH_INDICES));
 
+        // Initialize m_colors with the number of instances
+        m_colors = new std::vector<glm::vec4>(m_instances);
 
+        // Generate random colors for each instance
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_real_distribution<float> dist(0.0f, 1.0f);
 
+        for (int i = 0; i < m_instances; i++) {
+            m_colors->at(i) = glm::vec4(dist(gen), dist(gen), dist(gen), 1.0f);
+        }
+            
+            
+        // Pass these colors to your GpuMesh class
         // std::vector<glm::mat4> model_matrices(m_instances);
         m_model_matrices = new std::vector<glm::mat4>(m_instances);
-
+        
         int grid_x = 100; // Example: 2,000,000 objects
         int grid_y = 100;
         int grid_z = 100;
-
+        
         float spacing = 4.0f;
-
+        
         for (int x = 0; x < grid_x; x++) {
             for (int y = 0; y < grid_y; y++) {
                 for (int z = 0; z < grid_z; z++) {
@@ -43,7 +57,7 @@ namespace test{
             }
         }
         
-        m_cube.setData(m_vertices, m_indices, *m_model_matrices, m_instances);
+        m_cube.setData(m_vertices, m_indices, *m_model_matrices, *m_colors, m_instances);
         m_shader.setShader("gpu_renderer.glsl");
 
 

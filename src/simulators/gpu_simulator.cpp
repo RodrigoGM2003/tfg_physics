@@ -10,16 +10,15 @@
 #include "glm/gtx/component_wise.hpp"
 
 
+
+
 GpuSimulator::GpuSimulator(
     std::vector<glm::mat4>* transforms, 
-    const std::vector<Vertex>* static_vertices, 
+    const std::vector<SimpleVertex>* static_vertices, 
     const std::vector<unsigned int>* static_indices
 ) : sim_transforms(transforms), 
     sim_static_vertices(static_vertices), 
     sim_static_indices(static_indices){
-
-    //Create the objects
-    sim_objects.reserve(sim_transforms->size());
 
     //Create AABBs
     physics::AABB base_aabb = utils::calculateAABB(*sim_static_vertices);
@@ -28,25 +27,18 @@ GpuSimulator::GpuSimulator(
     sim_properties.resize(sim_transforms->size());
 
     for (int i = 0; i < sim_transforms->size(); i++){
-        physics::GpuObject object;
         
-        object.transform = &sim_transforms->at(i);
-        object.static_vertices = sim_static_vertices;
+        auto transform = &sim_transforms->at(i);
         
-        sim_aabbs[i].extents *= utils::scaleFromTransform(*object.transform);
+        sim_aabbs[i].extents *= utils::scaleFromTransform(*transform);
         float max_extent = std::max(std::max(sim_aabbs[i].extents.x, sim_aabbs[i].extents.y), sim_aabbs[i].extents.z);
         sim_aabbs[i].extents = glm::vec3(max_extent * 1.01f);
-        sim_aabbs[i] = utils::updateAABB(sim_aabbs[i], object.transform);
-        object.aabb = &sim_aabbs[i];
+        sim_aabbs[i] = utils::updateAABB(sim_aabbs[i], transform);
 
         sim_properties[i].velocity = glm::linearRand(glm::vec3(-0.05f), glm::vec3(0.05f));
         sim_properties[i].acceleration = glm::vec3(0.0f);
         sim_properties[i].angular_velocity = glm::linearRand(glm::vec3(-0.05f), glm::vec3(0.05f));
         sim_properties[i].angular_acceleration = glm::vec3(0.0f);
-        
-        
-        object.physics = &sim_properties[i];
-        sim_objects.push_back(object);
     }
 
     //COMPUTE SHADER
@@ -74,7 +66,6 @@ GpuSimulator::~GpuSimulator(){
     sim_transforms = nullptr;
     sim_static_vertices = nullptr;
     sim_static_indices = nullptr;
-    sim_objects.clear();
 }
 
 void GpuSimulator::update(float delta_time){

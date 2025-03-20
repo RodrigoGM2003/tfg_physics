@@ -19,12 +19,11 @@
 class GpuSimulator : public Simulable{ 
 private:
     std::vector<glm::mat4>* sim_transforms; //SSBO 3
-    const std::vector<Vertex>* sim_static_vertices; //Vertex data
-    const std::vector<unsigned int>* sim_static_indices; //Vertex indices
+    const std::vector<SimpleVertex>* sim_static_vertices; //SimpleVertex data
+    const std::vector<unsigned int>* sim_static_indices; //SimpleVertex indices
 
     std::vector<physics::AABB> sim_aabbs; //SSBO 1
     std::vector<physics::Properties> sim_properties; //SSBO2
-    std::vector<physics::GpuObject> sim_objects;
 
     ComputeShader m_shader;
     ShaderStorageBuffer m_transform_ssbo;
@@ -38,7 +37,7 @@ public:
      * @param static_vertices pointer to the original vertices of the geometry
      * @param static_indices pointer to the order in which each triangle is being drawn
      */
-    GpuSimulator(std::vector<glm::mat4>* transforms, const std::vector<Vertex>* static_vertices, const std::vector<unsigned int>* static_indices);
+    GpuSimulator(std::vector<glm::mat4>* transforms, const std::vector<SimpleVertex>* static_vertices, const std::vector<unsigned int>* static_indices);
     
     /**
      * @brief class destroyer. The memory is not dereferenced.

@@ -29,15 +29,16 @@ namespace test{
         glm::vec3 m_light_start_pos = glm::vec3(-2.0f, -2.0f, 2.0f);
 
         std::vector<glm::mat4>* m_model_matrices;
+        std::vector<glm::vec4>* m_colors;
 
-        glm::vec4 light_color = glm::vec4(0.595f, 0.558f, 0.429f, 1.0f);
+        glm::vec4 light_color = glm::vec4(1.0f ,1.0f, 1.0f, 1.0f);
 
         Shader m_shader;
         Shader m_light_shader;
 
         float m_time_factor = 1.0f;
 
-        std::vector<Vertex> m_vertices;
+        std::vector<SimpleVertex> m_vertices;
         std::vector<unsigned int> m_indices;
         GpuMesh m_cube;
 
