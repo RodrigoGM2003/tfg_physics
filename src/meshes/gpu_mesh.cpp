@@ -26,7 +26,7 @@ void GpuMesh::setBuffers(){
     //Create index buffer
     m_ib.setBuffer(m_indices->data(), m_indices->size());
 
-    m_color_ssbo.setBuffer(m_model_colors->data(), m_model_colors->size() * sizeof(glm::vec3), GL_STATIC_DRAW);
+    m_color_ssbo.setBuffer(m_model_colors->data(), m_model_colors->size() * sizeof(glm::vec4), GL_STATIC_DRAW);
     m_color_ssbo.bindToBindingPoint(10);
 
     //Unbind everything

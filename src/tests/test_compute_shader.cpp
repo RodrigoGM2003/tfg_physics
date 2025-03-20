@@ -17,7 +17,7 @@ extern GLFWwindow * c_window;
 namespace test{
 
     TestComputeShader::TestComputeShader()
-        : m_camera(m_width, m_height, glm::vec3(0.0f, 0.0f, 3.0f)) {
+        : m_camera(m_width, m_height, glm::vec3(.0f, 0.0f, 100.0f)) {
 
         // Cube vertices
         m_vertices = std::vector<SimpleVertex>(std::begin(CONSTANTS::CUBE_MESH_SIMPLE_VERTICES), std::end(CONSTANTS::CUBE_MESH_SIMPLE_VERTICES));
@@ -25,17 +25,16 @@ namespace test{
         m_indices = std::vector<unsigned int>(std::begin(CONSTANTS::CUBE_MESH_INDICES), std::end(CONSTANTS::CUBE_MESH_INDICES));
 
         // Initialize m_colors with the number of instances
-        m_colors = new std::vector<glm::vec4>(m_instances);
+        m_colors = new std::vector<glm::vec4>(m_instances, glm::vec4(1.0f));
 
         // Generate random colors for each instance
         std::random_device rd;
-        std::mt19937 gen(rd());
+        static std::mt19937 gen(rd());
         std::uniform_real_distribution<float> dist(0.0f, 1.0f);
 
         for (int i = 0; i < m_instances; i++) {
             m_colors->at(i) = glm::vec4(dist(gen), dist(gen), dist(gen), 1.0f);
         }
-            
             
         // Pass these colors to your GpuMesh class
         // std::vector<glm::mat4> model_matrices(m_instances);
@@ -46,12 +45,18 @@ namespace test{
         int grid_z = 100;
         
         float spacing = 4.0f;
-        
+
+        // Calculate center offset
+        glm::vec3 center_offset = glm::vec3((grid_x - 1) * 0.5f * spacing, 
+                                            (grid_y - 1) * 0.5f * spacing, 
+                                            -(grid_z - 1) * 0.5f * spacing);
+
         for (int x = 0; x < grid_x; x++) {
             for (int y = 0; y < grid_y; y++) {
                 for (int z = 0; z < grid_z; z++) {
                     glm::mat4 model = glm::mat4(1.0f);
-                    model = glm::translate(model, glm::vec3(x * spacing, y * spacing, -z * spacing));
+                    glm::vec3 position = glm::vec3(x * spacing, y * spacing, -z * spacing) - center_offset;
+                    model = glm::translate(model, position);
                     m_model_matrices->at(x * grid_y * grid_z + y * grid_z + z) = model;
                 }
             }
