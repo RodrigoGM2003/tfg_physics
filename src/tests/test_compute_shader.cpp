@@ -49,37 +49,6 @@ namespace test{
 
         m_simulator = new GpuSimulator(m_model_matrices, &m_vertices, &m_indices);
 
-
-        std::vector<Vertex> light_vertices = {
-            {{-0.1f, -0.1f, -0.1f},     {0, 0, 0, 0},      {0, 0, 0}},   //0
-            {{ 0.1f, -0.1f, -0.1f},     {0, 0, 0, 0},      {0, 0, 0}},   //1
-            {{ 0.1f, -0.1f,  0.1f},     {0, 0, 0, 0},      {0, 0, 0}},   //0
-            {{-0.1f, -0.1f,  0.1f},     {0, 0, 0, 0},      {0, 0, 0}},   //0
-
-            {{-0.1f,  0.1f, -0.1f},     {0, 0, 0, 0},      {0, 0, 0}},   //0
-            {{ 0.1f,  0.1f, -0.1f},     {0, 0, 0, 0},      {0, 0, 0}},   //0
-            {{ 0.1f,  0.1f,  0.1f,},    {0, 0, 0, 0},      {0, 0, 0}},   //0
-            {{-0.1f,  0.1f,  0.1f},     {0, 0, 0, 0},      {0, 0, 0}}   //0
-        };
-        std::vector<unsigned int> light_indices = { 
-            0, 1, 2,
-            2, 3, 0,
-            0, 5, 1,
-            0, 4, 5,
-            1, 6, 2,
-            1, 5, 6,
-            2, 6, 3,
-            3, 6, 7,
-            0, 7, 4,
-            0, 3, 7,
-            4, 6, 5,
-            4, 7, 6
-        };
-
-
-        m_light.setData(light_vertices, light_indices);
-        m_light.setPosition(m_light_start_pos);
-
         m_light_shader.setShader("light.glsl");
 
         GLCall(glViewport(0, 0, m_width, m_height));
@@ -89,7 +58,6 @@ namespace test{
         GLCall(glEnable(GL_CULL_FACE));
         GLCall(glCullFace(GL_BACK));
         GLCall(glFrontFace(GL_CCW));
-
     }
 
     TestComputeShader::~TestComputeShader(){
@@ -120,7 +88,7 @@ namespace test{
         //Place the cube 
         m_shader.bind();
         m_shader.setUniformVec4f("u_light_color", light_color);
-        m_shader.setUniformVec3f("u_light_pos", m_light.getPosition());
+        m_shader.setUniformVec3f("u_light_pos", m_camera.getPosition());
         m_shader.setUniform1f("u_a", m_a);
         m_shader.setUniform1f("u_b", m_b);
 
@@ -130,7 +98,6 @@ namespace test{
 
         //Draw the cube
         renderer.instancedDraw(m_cube.getVertexArray(), m_cube.getIndexBuffer(), m_shader, m_camera, m_instances);
-        renderer.draw(m_light, m_light_shader, m_camera);
     }
 
 
@@ -144,8 +111,6 @@ namespace test{
         ImGui::SliderFloat4("Light color", &light_color.x, 0.0f, 1.0f);
 
         ImGui::Text("Positions");
-
-        ImGui::SliderFloat3("Light Position", &m_light.getPosition().x, -10.0f, 150.0f);
 
         ImGui::SliderFloat("quadratic", &m_a, 0.0f, 0.01f);
         ImGui::SliderFloat("linear", &m_b, 0.0f, 0.01f);

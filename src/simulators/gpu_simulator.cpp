@@ -51,6 +51,7 @@ GpuSimulator::GpuSimulator(
 
     //COMPUTE SHADER
     m_shader.setShader("compute.glsl");
+    m_shader.bind();
 
     //SSBOs
     m_transform_ssbo.setBuffer(sim_transforms->data(), sim_transforms->size() * sizeof(glm::mat4), GL_DYNAMIC_DRAW);

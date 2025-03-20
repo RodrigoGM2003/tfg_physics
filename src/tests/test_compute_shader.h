@@ -40,7 +40,6 @@ namespace test{
         std::vector<Vertex> m_vertices;
         std::vector<unsigned int> m_indices;
         GpuMesh m_cube;
-        Mesh m_light;
 
         Camera m_camera;
 
