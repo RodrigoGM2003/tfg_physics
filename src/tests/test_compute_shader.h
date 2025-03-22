@@ -19,10 +19,10 @@ namespace test{
 
     class TestComputeShader : public Test{
     private:
-        const unsigned int m_width = 800;
-        const unsigned int m_height = 800;
+        const unsigned int m_width = 1920;
+        const unsigned int m_height = 1080;
 
-        unsigned int m_instances = 1000000;
+        unsigned int m_instances = 1000;
 
         //Add cube pos 
         glm::vec3 m_cube_start_pos = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -36,7 +36,7 @@ namespace test{
         Shader m_shader;
         Shader m_light_shader;
 
-        float m_time_factor = 1.0f;
+        float m_time_factor = 0.0f;
 
         std::vector<SimpleVertex> m_vertices;
         std::vector<unsigned int> m_indices;

@@ -1,28 +1,19 @@
 #version 430 core
 
+#include "common_structs.glsl"
+
 layout(std430, binding = 1) buffer TransformBuffer {
     mat4 transforms[];
 };
 
-struct PropertiesStruct {
-    vec4 velocity;
-    vec4 acceleration;
-    vec4 angular_velocity;
-    vec4 angular_acceleration;
-};
 layout(std430, binding = 2) buffer PropertiesBuffer {
     PropertiesStruct properties[];
 };
 
-struct AABBStruct {
-    vec4 min;
-    vec4 max;
-    vec4 center;
-    vec4 extents;
-};
 layout(std430, binding = 3) buffer AABBsBuffer {
     AABBStruct aabbs[];
 };
+
 
 uniform float delta_time;
 

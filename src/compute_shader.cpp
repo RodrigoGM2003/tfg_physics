@@ -9,11 +9,11 @@
 #include "renderer.h" // Assuming this includes your OpenGL calls and GLCall macro
 
 ComputeShader::ComputeShader()
-    : m_renderer_id(0), m_file_path("") {
+    : m_renderer_id(0), m_file_path(""), m_timer(false) {
 }
 
 ComputeShader::ComputeShader(const std::string& filename)
-    : m_renderer_id(0) {
+    : m_renderer_id(0), m_timer(false) {
     // Get the path of the file
     m_file_path = __FILE__;
     m_file_path = m_file_path.substr(0, m_file_path.find_last_of("\\/"));
@@ -22,9 +22,14 @@ ComputeShader::ComputeShader(const std::string& filename)
     // Read the shader file and create the shader
     std::string source = this->readComputeShader(m_file_path);
     m_renderer_id = this->createComputeShader(source);
+
+    this->m_timer = time;
 }
 
 ComputeShader::~ComputeShader() {
+    if(m_timer)
+        GLCall(glDeleteQueries(2, m_timer_queries))
+    
     GLCall(glDeleteProgram(m_renderer_id));
 }
 
@@ -37,14 +42,38 @@ void ComputeShader::unbind() const {
 }
 
 void ComputeShader::dispatch(unsigned int num_groups_x, unsigned int num_groups_y, unsigned int num_groups_z) const {
+    if (m_timer){
+        GLCall(glBeginQuery(GL_TIME_ELAPSED, m_timer_queries[0]));
+    }
     GLCall(glDispatchCompute(num_groups_x, num_groups_y, num_groups_z));
 }
+
 void ComputeShader::use() const {
     GLCall(glUseProgram(m_renderer_id));
 }
 
-void ComputeShader::waitForCompletion(unsigned int barrier) const {
+void ComputeShader::useTimer(bool time){
+    if(!time && m_timer){
+        GLCall(glDeleteQueries(2, m_timer_queries));
+    }
+    else if (time){
+        m_timer = time;
+        GLCall(glGenQueries(2, m_timer_queries));
+    } 
+}
+
+unsigned int ComputeShader::waitForCompletion(unsigned int barrier) const {
     GLCall(glMemoryBarrier(barrier));
+
+    unsigned long long time_elapsed = 0;
+
+    if(m_timer){
+        GLCall(glEndQuery(GL_TIME_ELAPSED));
+        GLCall(glGetQueryObjectui64v(m_timer_queries[0], GL_QUERY_RESULT, &time_elapsed));
+        return static_cast<unsigned int>(time_elapsed);
+    }
+
+    return 0;
 }
 
 void ComputeShader::setUniform1i(const std::string& name, int v0) {
@@ -98,24 +127,66 @@ void ComputeShader::setShader(const std::string& filename) {
     m_renderer_id = this->createComputeShader(source);
 }
 
-std::string ComputeShader::readComputeShader(const std::string& file) {
-    std::ifstream stream(file);
+// std::string ComputeShader::readComputeShader(const std::string& file) {
+//     std::ifstream stream(file);
 
-    // Check for error when opening file
+//     // Check for error when opening file
+//     if (!stream.is_open()) {
+//         std::cerr << "Error: Could not open file " << file << std::endl;
+//         return "";
+//     }
+
+//     std::string line;
+//     std::stringstream ss;
+//     std::unordered_set<std::string> includes;
+
+//     // Read the file line by line
+//     while (getline(stream, line)) {
+//         ss << line << '\n';
+//     }
+
+//     return ss.str();
+// }
+std::string ComputeShader::readComputeShader(const std::string& file) {
+    std::unordered_set<std::string> includedFiles;
+    return this->processShaderIncludes(file, includedFiles);
+}
+
+std::string ComputeShader::processShaderIncludes(const std::string& file, std::unordered_set<std::string>& includedFiles) {
+    if (includedFiles.find(file) != includedFiles.end()) {
+        return "";
+    }
+    includedFiles.insert(file);
+
+    std::ifstream stream(file);
     if (!stream.is_open()) {
         std::cerr << "Error: Could not open file " << file << std::endl;
         return "";
     }
 
+    std::stringstream shaderCode;
     std::string line;
-    std::stringstream ss;
-    
-    // Read the file line by line
+    std::filesystem::path directory = std::filesystem::path(file).parent_path(); // Get the directory
+
     while (getline(stream, line)) {
-        ss << line << '\n';
+        if (line.find("#include") != std::string::npos) {
+            size_t firstQuote = line.find("\"");
+            size_t lastQuote = line.find_last_of("\"");
+
+            if (firstQuote != std::string::npos && lastQuote != std::string::npos && firstQuote != lastQuote) {
+                std::string includeFile = line.substr(firstQuote + 1, lastQuote - firstQuote - 1);
+                std::filesystem::path includePath = directory / includeFile; // Use filesystem for proper path handling
+
+                shaderCode << processShaderIncludes(includePath.string(), includedFiles) << "\n";
+            } else {
+                std::cerr << "Error: Malformed #include directive in " << file << ": " << line << std::endl;
+            }
+        } else {
+            shaderCode << line << "\n";
+        }
     }
 
-    return ss.str();
+    return shaderCode.str();
 }
 
 unsigned int ComputeShader::compileComputeShader(const std::string& source) {

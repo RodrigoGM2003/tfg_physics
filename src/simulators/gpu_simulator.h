@@ -25,10 +25,13 @@ private:
     std::vector<physics::AABB> sim_aabbs; //SSBO 1
     std::vector<physics::Properties> sim_properties; //SSBO2
 
-    ComputeShader m_shader;
+    ComputeShader m_transform_shader;
+    std::vector<ComputeShader> m_physics_shaders;
+
     ShaderStorageBuffer m_transform_ssbo;
     ShaderStorageBuffer m_aabbs_ssbo;
     ShaderStorageBuffer m_properties_ssbo;
+    ShaderStorageBuffer m_results_ssbo;
 
 public:
     /**

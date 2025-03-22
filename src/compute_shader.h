@@ -5,6 +5,8 @@
 
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
+#include <GL/glew.h> // Include GLEW for OpenGL types
 
 #include "glm/glm.hpp"
 
@@ -16,6 +18,9 @@ private:
     unsigned int m_renderer_id; // Shader program id
     std::string m_file_path; // File path of the shader
     std::unordered_map<std::string, int> m_uniform_location_cache; // Cache for uniform locations
+
+    bool m_timer;
+    GLuint m_timer_queries[2]; // Correct type for timer queries
 
 public:
     /**
@@ -58,10 +63,16 @@ public:
     void use() const;
 
     /**
+     * @brief Sets the timing of the shader operation
+     * @param time if true, the shader will time each execution
+     */
+    void useTimer(bool time);
+
+    /**
      * @brief Waits for compute shader to finish
      * @param barrier barrier to wait for
      */
-    void waitForCompletion(unsigned int barrier) const;
+    unsigned int waitForCompletion(unsigned int barrier) const;
 
     /**
      * @brief Sets a uniform of type int
@@ -142,6 +153,7 @@ private:
      * @return std::string containing the compute shader source
      */
     std::string readComputeShader(const std::string& file);
+    std::string processShaderIncludes(const std::string& file, std::unordered_set<std::string>& includedFiles);
 
     /**
      * @brief Compiles a compute shader and returns its id

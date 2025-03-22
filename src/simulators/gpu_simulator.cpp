@@ -1,6 +1,7 @@
 #include "gpu_simulator.h"
 
 #include <iostream>
+#include <chrono>
 
 #include "glm/gtc/matrix_transform.hpp" 
 #include "glm/gtx/transform.hpp"
@@ -10,6 +11,8 @@
 #include "glm/gtx/component_wise.hpp"
 
 
+const glm::vec3 WORLD_MAX = glm::vec3(300.0f,300.0f,300.0f);
+const glm::vec3 WORLD_MIN = glm::vec3(-300.0f,-300.0f,-300.0f);
 
 
 GpuSimulator::GpuSimulator(
@@ -41,9 +44,16 @@ GpuSimulator::GpuSimulator(
         sim_properties[i].angular_acceleration = glm::vec3(0.0f);
     }
 
-    //COMPUTE SHADER
-    m_shader.setShader("compute.glsl");
-    m_shader.bind();
+    //Transform update shader
+    m_transform_shader.setShader("go_back.glsl");
+    m_transform_shader.bind();
+    // m_transform_shader.setUniform1f("u_boundary_min", -27.5f);
+    // m_transform_shader.setUniform1f("u_boundary_max", 27.5f);
+
+    m_physics_shaders.resize(10, ComputeShader());
+    m_physics_shaders.at(0).setShader("naive.glsl");
+    m_physics_shaders.at(0).useTimer(true);
+    m_physics_shaders.at(0).bind();
 
     //SSBOs
     m_transform_ssbo.setBuffer(sim_transforms->data(), sim_transforms->size() * sizeof(glm::mat4), GL_DYNAMIC_DRAW);
@@ -55,11 +65,13 @@ GpuSimulator::GpuSimulator(
     m_aabbs_ssbo.setBuffer(sim_aabbs.data(), sim_aabbs.size() * sizeof(physics::AABB), GL_DYNAMIC_DRAW);
     m_aabbs_ssbo.unbind();
 
-    // m_transform_ssbo.bindToBindingPoint(1);
+    m_results_ssbo.setBuffer(nullptr, sim_transforms->size() * sizeof(int), GL_DYNAMIC_DRAW);
+
 
     m_transform_ssbo.bindToBindingPoint(1);
     m_properties_ssbo.bindToBindingPoint(2);
     m_aabbs_ssbo.bindToBindingPoint(3);
+    m_results_ssbo.bindToBindingPoint(4);
 }
 
 GpuSimulator::~GpuSimulator(){
@@ -70,13 +82,26 @@ GpuSimulator::~GpuSimulator(){
 
 void GpuSimulator::update(float delta_time){
 
-    m_shader.bind();
-    m_shader.use();
-    m_shader.setUniform1f("delta_time", delta_time);
-
+    
+    m_transform_shader.bind();
+    m_transform_shader.use();
+    m_transform_shader.setUniform1f("delta_time", delta_time);
+    
     int work_gropus = (sim_transforms->size() + 256 - 1) / 256;
-    m_shader.dispatch(work_gropus, 1, 1);
-    m_shader.waitForCompletion(GL_SHADER_STORAGE_BARRIER_BIT);
+    m_transform_shader.dispatch(work_gropus, 1, 1);
+    m_transform_shader.waitForCompletion(GL_SHADER_STORAGE_BARRIER_BIT);
+    
+    unsigned int time = 0;
+    for(int i = 0; i < 1; i++){
+        m_physics_shaders.at(i).bind();
+        m_physics_shaders.at(i).use();
+        
+        m_physics_shaders.at(i).dispatch(work_gropus, 1, 1);
+        time = m_physics_shaders.at(i).waitForCompletion(GL_SHADER_STORAGE_BARRIER_BIT);
+    }
+    // float f_time = time;
+    // f_time /= 1000000;
+    // std::cout<<f_time<<std::endl;
 }
 
 void GpuSimulator::updateObject(physics::GpuObject& object, float delta_time){

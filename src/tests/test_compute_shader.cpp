@@ -32,19 +32,21 @@ namespace test{
         static std::mt19937 gen(rd());
         std::uniform_real_distribution<float> dist(0.0f, 1.0f);
 
+        // for (int i = 0; i < m_instances; i++) {
+        //     m_colors->at(i) = glm::vec4(dist(gen), dist(gen), dist(gen), 1.0f);
+        // }
         for (int i = 0; i < m_instances; i++) {
-            m_colors->at(i) = glm::vec4(dist(gen), dist(gen), dist(gen), 1.0f);
+            m_colors->at(i) = glm::vec4(0.2f,0.2f,0.2f, 1.0f);
         }
             
         // Pass these colors to your GpuMesh class
-        // std::vector<glm::mat4> model_matrices(m_instances);
         m_model_matrices = new std::vector<glm::mat4>(m_instances);
         
-        int grid_x = 100; // Example: 2,000,000 objects
-        int grid_y = 100;
-        int grid_z = 100;
+        int grid_x = 10;
+        int grid_y = 10;
+        int grid_z = 10;
         
-        float spacing = 4.0f;
+        float spacing = 5.0f;
 
         // Calculate center offset
         glm::vec3 center_offset = glm::vec3((grid_x - 1) * 0.5f * spacing, 
@@ -102,7 +104,7 @@ namespace test{
         Renderer renderer;
 
         m_camera.input(c_window);
-        m_camera.updateMatrix(55.0f, 0.1f, 1000.0f);
+        m_camera.updateMatrix(55.0f, 0.1f, 10000.0f);
 
         //Place the cube 
         m_shader.bind();
@@ -123,17 +125,17 @@ namespace test{
     void TestComputeShader::onImGuiRender(){
         ImGui::Text("Lightning test");
         ImGui::Text("FPS counter");
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         ImGui::SliderFloat("Sensitivity", &m_camera.m_sensitivity, 10.0f, 100.0f);
-
+        
         ImGui::Text("Lightning color");
         ImGui::SliderFloat4("Light color", &light_color.x, 0.0f, 1.0f);
-
+        
         ImGui::Text("Positions");
-
+        
         ImGui::SliderFloat("quadratic", &m_a, 0.0f, 0.01f);
         ImGui::SliderFloat("linear", &m_b, 0.0f, 0.01f);
-
+        
         ImGui::SliderFloat("Time factor", &m_time_factor, 0.0f, 100.0f);
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
     }
 }

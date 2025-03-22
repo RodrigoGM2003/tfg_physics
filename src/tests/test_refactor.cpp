@@ -20,16 +20,11 @@ namespace test{
         : m_camera(m_width, m_height, glm::vec3(0.0f, 0.0f, 3.0f)) {
 
         //Cube vertices
-        std::vector<Vertex> vertices(std::begin(CONSTANTS::SPHERE_MESH_VERTICES), std::end(CONSTANTS::SPHERE_MESH_VERTICES));
-        std::vector<unsigned int> indices(std::begin(CONSTANTS::SPHERE_MESH_INDICES), std::end(CONSTANTS::SPHERE_MESH_INDICES));
+        std::vector<Vertex> vertices(std::begin(CONSTANTS::DODECAHEDRON_MESH_VERTICES), std::end(CONSTANTS::DODECAHEDRON_MESH_VERTICES));
+        std::vector<unsigned int> indices(std::begin(CONSTANTS::DODECAHEDRON_MESH_INDICES), std::end(CONSTANTS::DODECAHEDRON_MESH_INDICES));
 
-
-        
-        
-        // m_cube = Mesh(vertices, indices);
         m_cube.setData(vertices, indices);
         m_cube.setPosition(m_cube_start_pos);
-        
         
         
         m_shader.setShader("cube.glsl");
