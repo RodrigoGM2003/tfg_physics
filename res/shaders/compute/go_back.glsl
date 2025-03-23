@@ -145,7 +145,8 @@ void main() {
         vec4(new_position, 1.0)
     );
     
-    // Update AABB efficiently (minimal calculations)
+    // Update AABB with rotation-invariant approach
+    extents = aabbs[gid].extents.xyz;
     aabbs[gid].center.xyz = new_position;
     aabbs[gid].min.xyz = new_position - extents;
     aabbs[gid].max.xyz = new_position + extents;

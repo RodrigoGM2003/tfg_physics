@@ -48,8 +48,8 @@ namespace test{
 
         Simulable* m_simulator;
 
-        float m_a = 0.01f;
-        float m_b = 0.01f;
+        float m_a = 0.00f;
+        float m_b = 0.00f;
 
     public:
         TestComputeShader();

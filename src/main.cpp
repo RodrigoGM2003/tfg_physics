@@ -27,8 +27,8 @@
 GLFWwindow * c_window = nullptr; /*Main Window*/
 
 int
-    w_width  = 800, /*Window width*/
-    w_height = 800 ; /*Window heigth*/
+    w_width  = 1920, /*Window width*/
+    w_height = 1080 ; /*Window heigth*/
 
 bool terminate_program = false; /*Program termination*/
 

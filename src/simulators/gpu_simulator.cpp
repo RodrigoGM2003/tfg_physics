@@ -35,7 +35,7 @@ GpuSimulator::GpuSimulator(
         
         sim_aabbs[i].extents *= utils::scaleFromTransform(*transform);
         float max_extent = std::max(std::max(sim_aabbs[i].extents.x, sim_aabbs[i].extents.y), sim_aabbs[i].extents.z);
-        sim_aabbs[i].extents = glm::vec3(max_extent * 1.01f);
+        sim_aabbs[i].extents = glm::vec3(max_extent);
         sim_aabbs[i] = utils::updateAABB(sim_aabbs[i], transform);
 
         sim_properties[i].velocity = glm::linearRand(glm::vec3(-0.05f), glm::vec3(0.05f));
