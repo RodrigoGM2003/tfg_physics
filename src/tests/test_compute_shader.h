@@ -22,7 +22,8 @@ namespace test{
         const unsigned int m_width = 1920;
         const unsigned int m_height = 1080;
 
-        unsigned int m_instances = 1000;
+        unsigned int m_instances = 50000;
+        // unsigned int m_instances = 1000;
 
         //Add cube pos 
         glm::vec3 m_cube_start_pos = glm::vec3(0.0f, 0.0f, 0.0f);

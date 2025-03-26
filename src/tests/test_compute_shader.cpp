@@ -20,9 +20,9 @@ namespace test{
         : m_camera(m_width, m_height, glm::vec3(.0f, 0.0f, 100.0f)) {
 
         // Cube vertices
-        m_vertices = std::vector<SimpleVertex>(std::begin(CONSTANTS::ICOSAHEDRON_MESH_SIMPLE_VERTICES), std::end(CONSTANTS::ICOSAHEDRON_MESH_SIMPLE_VERTICES));
+        m_vertices = std::vector<SimpleVertex>(std::begin(CONSTANTS::CUBE_MESH_SIMPLE_VERTICES), std::end(CONSTANTS::CUBE_MESH_SIMPLE_VERTICES));
     
-        m_indices = std::vector<unsigned int>(std::begin(CONSTANTS::ICOSAHEDRON_MESH_INDICES), std::end(CONSTANTS::ICOSAHEDRON_MESH_INDICES));
+        m_indices = std::vector<unsigned int>(std::begin(CONSTANTS::CUBE_MESH_INDICES), std::end(CONSTANTS::CUBE_MESH_INDICES));
 
         // Initialize m_colors with the number of instances
         m_colors = new std::vector<glm::vec4>(m_instances, glm::vec4(1.0f));
@@ -42,9 +42,12 @@ namespace test{
         // Pass these colors to your GpuMesh class
         m_model_matrices = new std::vector<glm::mat4>(m_instances);
         
-        int grid_x = 10;
-        int grid_y = 10;
-        int grid_z = 10;
+        int grid_x = 50;
+        int grid_y = 50;
+        int grid_z = 20;
+        // int grid_x = 10;
+        // int grid_y = 10;
+        // int grid_z = 10;
         
         float spacing = 5.0f;
 
@@ -87,16 +90,8 @@ namespace test{
 
     }
 
-
-    void TestComputeShader::onUpdate(float delta_time){
-        // const glm::vec3 translation(0.01f, 0.0f, 0.0f);
-
-        // for (int i = 0; i < m_instances; i++) 
-        //     m_model_matrices->operator[](i) = glm::translate(m_model_matrices->operator[](i), translation);
-        
-
+    void TestComputeShader::onUpdate(float delta_time){ 
         m_simulator->update(delta_time * m_time_factor);
-        // m_cube.updateModelMatrices();
     }
 
 

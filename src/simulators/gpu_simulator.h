@@ -32,6 +32,7 @@ private:
     ShaderStorageBuffer m_aabbs_ssbo;
     ShaderStorageBuffer m_properties_ssbo;
     ShaderStorageBuffer m_results_ssbo;
+    ShaderStorageBuffer m_spheres_ssbo;
 
 public:
     /**
@@ -57,6 +58,11 @@ private:
      * @brief take a step for each object
      */
     void updateObject(physics::GpuObject& object, float delta_time);
+
+    /**
+     * @brief Initializes the data for the sumulation
+     */
+    void initializeData();
 };
 
 

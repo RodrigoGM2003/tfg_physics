@@ -18,6 +18,10 @@ layout(std430, binding = 4) buffer ResultsBuffer {
     int results[];
 };
 
+layout(std430, binding = 7) buffer SphereBuffer {
+    vec4 spheres[];
+};
+
 uniform float delta_time;
 
 layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
@@ -95,6 +99,6 @@ void main() {
     aabbs[gid].min.xyz = new_position - extents;
     aabbs[gid].max.xyz = new_position + extents;
 
-    // spheres[gid].xyz = new_position;
+    spheres[gid].xyz = new_position;
     // spheres[gid].w = max(max(extents.x, extents.y), extents.z);
 }

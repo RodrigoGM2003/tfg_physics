@@ -23,36 +23,17 @@ GpuSimulator::GpuSimulator(
     sim_static_vertices(static_vertices), 
     sim_static_indices(static_indices){
 
-    //Create AABBs
-    physics::AABB base_aabb = utils::calculateAABB(*sim_static_vertices);
-    sim_aabbs.resize(sim_transforms->size(), base_aabb);
-
-    sim_properties.resize(sim_transforms->size());
-
-    for (int i = 0; i < sim_transforms->size(); i++){
-        
-        auto transform = &sim_transforms->at(i);
-        
-        sim_aabbs[i].extents *= utils::scaleFromTransform(*transform);
-        float max_extent = std::max(std::max(sim_aabbs[i].extents.x, sim_aabbs[i].extents.y), sim_aabbs[i].extents.z);
-        sim_aabbs[i].extents = glm::vec3(max_extent);
-        sim_aabbs[i] = utils::updateAABB(sim_aabbs[i], transform);
-
-        sim_properties[i].velocity = glm::linearRand(glm::vec3(-0.05f), glm::vec3(0.05f));
-        sim_properties[i].acceleration = glm::vec3(0.0f);
-        sim_properties[i].angular_velocity = glm::linearRand(glm::vec3(-0.05f), glm::vec3(0.05f));
-        sim_properties[i].angular_acceleration = glm::vec3(0.0f);
-    }
+    initializeData();
 
     //Transform update shader
-    m_transform_shader.setShader("go_back.glsl");
+    m_transform_shader.setShader("sphere_transforms.glsl");
     m_transform_shader.bind();
     // m_transform_shader.setUniform1f("u_boundary_min", -27.5f);
     // m_transform_shader.setUniform1f("u_boundary_max", 27.5f);
 
     m_physics_shaders.resize(10, ComputeShader());
-    m_physics_shaders.at(0).setShader("naive.glsl");
-    m_physics_shaders.at(0).useTimer(true);
+    m_physics_shaders.at(0).setShader("oparallel_naive.glsl");
+    m_physics_shaders.at(0).useTimer(false);
     m_physics_shaders.at(0).bind();
 
     //SSBOs
@@ -66,12 +47,22 @@ GpuSimulator::GpuSimulator(
     m_aabbs_ssbo.unbind();
 
     m_results_ssbo.setBuffer(nullptr, sim_transforms->size() * sizeof(int), GL_DYNAMIC_DRAW);
+    m_results_ssbo.unbind();
 
+    std::vector<glm::vec4> spheres;
+    spheres.reserve(sim_transforms->size());
+    for (auto& aabb : sim_aabbs){
+        spheres.push_back(glm::vec4(aabb.center, aabb.extents.x));
+    }
+
+    m_spheres_ssbo.setBuffer(spheres.data(), spheres.size() * sizeof(glm::vec4), GL_DYNAMIC_DRAW);
+    m_spheres_ssbo.unbind();
 
     m_transform_ssbo.bindToBindingPoint(1);
     m_properties_ssbo.bindToBindingPoint(2);
     m_aabbs_ssbo.bindToBindingPoint(3);
     m_results_ssbo.bindToBindingPoint(4);
+    m_spheres_ssbo.bindToBindingPoint(7);
 }
 
 GpuSimulator::~GpuSimulator(){
@@ -87,21 +78,32 @@ void GpuSimulator::update(float delta_time){
     m_transform_shader.use();
     m_transform_shader.setUniform1f("delta_time", delta_time);
     
-    int work_gropus = (sim_transforms->size() + 256 - 1) / 256;
-    m_transform_shader.dispatch(work_gropus, 1, 1);
+    int work_groups = (sim_transforms->size() + 256 - 1) / 256;
+    m_transform_shader.dispatch(work_groups, 1, 1);
     m_transform_shader.waitForCompletion(GL_SHADER_STORAGE_BARRIER_BIT);
+
+
+    // work_groups = (sim_transforms->size() + 512 - 1) / 512;
+    // m_physics_shaders.at(0).bind();
+    // m_physics_shaders.at(0).use();
     
-    unsigned int time = 0;
-    for(int i = 0; i < 1; i++){
-        m_physics_shaders.at(i).bind();
-        m_physics_shaders.at(i).use();
-        
-        m_physics_shaders.at(i).dispatch(work_gropus, 1, 1);
-        time = m_physics_shaders.at(i).waitForCompletion(GL_SHADER_STORAGE_BARRIER_BIT);
-    }
-    // float f_time = time;
-    // f_time /= 1000000;
-    // std::cout<<f_time<<std::endl;
+    // m_physics_shaders.at(0).dispatch(work_groups, 1, 1);
+    // auto time = m_physics_shaders.at(0).waitForCompletion(GL_SHADER_STORAGE_BARRIER_BIT);
+
+
+    // Calculate work groups considering Y-axis spread
+    uint32_t work_groups_x = (sim_transforms->size() + 8 - 1) / 8;
+    // uint32_t work_groups_x = (sim_transforms->size() + 256 - 1) / 256;
+
+    m_physics_shaders.at(0).bind();
+    m_physics_shaders.at(0).use();
+
+    // Dispatch with both X and Y dimensions
+    m_physics_shaders.at(0).dispatch(work_groups_x * 64, 1, 1);
+    // m_physics_shaders.at(0).dispatch(work_groups_x, 1, 1);
+    auto time = m_physics_shaders.at(0).waitForCompletion(GL_SHADER_STORAGE_BARRIER_BIT);
+
+    // std::cout<<time<<std::endl;
 }
 
 void GpuSimulator::updateObject(physics::GpuObject& object, float delta_time){
@@ -143,4 +145,28 @@ void GpuSimulator::updateObject(physics::GpuObject& object, float delta_time){
     *object.transform = new_transform;
 
     *object.aabb = utils::updateAABB(*object.aabb, object.transform);
+}
+
+
+void GpuSimulator::initializeData(){
+    //Create AABBs
+    physics::AABB base_aabb = utils::calculateAABB(*sim_static_vertices);
+    sim_aabbs.resize(sim_transforms->size(), base_aabb);
+
+    sim_properties.resize(sim_transforms->size());
+
+    for (int i = 0; i < sim_transforms->size(); i++){
+        
+        auto transform = &sim_transforms->at(i);
+        
+        sim_aabbs[i].extents *= utils::scaleFromTransform(*transform);
+        float max_extent = std::max(std::max(sim_aabbs[i].extents.x, sim_aabbs[i].extents.y), sim_aabbs[i].extents.z);
+        sim_aabbs[i].extents = glm::vec3(max_extent);
+        sim_aabbs[i] = utils::updateAABB(sim_aabbs[i], transform);
+
+        sim_properties[i].velocity = glm::linearRand(glm::vec3(-0.05f), glm::vec3(0.05f));
+        sim_properties[i].acceleration = glm::vec3(0.0f);
+        sim_properties[i].angular_velocity = glm::linearRand(glm::vec3(-0.05f), glm::vec3(0.05f));
+        sim_properties[i].angular_acceleration = glm::vec3(0.0f);
+    }
 }

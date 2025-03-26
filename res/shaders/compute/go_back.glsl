@@ -75,54 +75,54 @@ void main() {
     vec3 collision_normal = vec3(0.0);
     bool collision_occurred = false;
     
-    // X-axis boundary collision
-    if (new_position.x - extents.x < u_boundary_min.x) {
-        new_position.x = u_boundary_min.x + extents.x + 0.001; // Slight offset to prevent sticking
-        collision_normal.x = 1.0;
-        collision_occurred = true;
-    }
-    else if (new_position.x + extents.x > u_boundary_max.x) {
-        new_position.x = u_boundary_max.x - extents.x - 0.001;
-        collision_normal.x = -1.0;
-        collision_occurred = true;
-    }
+    // // X-axis boundary collision
+    // if (new_position.x - extents.x < u_boundary_min.x) {
+    //     new_position.x = u_boundary_min.x + extents.x + 0.001; // Slight offset to prevent sticking
+    //     collision_normal.x = 1.0;
+    //     collision_occurred = true;
+    // }
+    // else if (new_position.x + extents.x > u_boundary_max.x) {
+    //     new_position.x = u_boundary_max.x - extents.x - 0.001;
+    //     collision_normal.x = -1.0;
+    //     collision_occurred = true;
+    // }
     
-    // Y-axis boundary collision
-    if (new_position.y - extents.y < u_boundary_min.y) {
-        new_position.y = u_boundary_min.y + extents.y + 0.001;
-        collision_normal.y = 1.0;
-        collision_occurred = true;
-    }
-    else if (new_position.y + extents.y > u_boundary_max.y) {
-        new_position.y = u_boundary_max.y - extents.y - 0.001;
-        collision_normal.y = -1.0;
-        collision_occurred = true;
-    }
+    // // Y-axis boundary collision
+    // if (new_position.y - extents.y < u_boundary_min.y) {
+    //     new_position.y = u_boundary_min.y + extents.y + 0.001;
+    //     collision_normal.y = 1.0;
+    //     collision_occurred = true;
+    // }
+    // else if (new_position.y + extents.y > u_boundary_max.y) {
+    //     new_position.y = u_boundary_max.y - extents.y - 0.001;
+    //     collision_normal.y = -1.0;
+    //     collision_occurred = true;
+    // }
     
-    // Z-axis boundary collision
-    if (new_position.z - extents.z < u_boundary_min.z) {
-        new_position.z = u_boundary_min.z + extents.z + 0.001;
-        collision_normal.z = 1.0;
-        collision_occurred = true;
-    }
-    else if (new_position.z + extents.z > u_boundary_max.z) {
-        new_position.z = u_boundary_max.z - extents.z - 0.001;
-        collision_normal.z = -1.0;
-        collision_occurred = true;
-    }
+    // // Z-axis boundary collision
+    // if (new_position.z - extents.z < u_boundary_min.z) {
+    //     new_position.z = u_boundary_min.z + extents.z + 0.001;
+    //     collision_normal.z = 1.0;
+    //     collision_occurred = true;
+    // }
+    // else if (new_position.z + extents.z > u_boundary_max.z) {
+    //     new_position.z = u_boundary_max.z - extents.z - 0.001;
+    //     collision_normal.z = -1.0;
+    //     collision_occurred = true;
+    // }
     
-    // Update velocity if collision occurred (reflection with restitution)
-    if (collision_occurred) {
-        // Component-wise velocity reflection based on the collision normal
-        velocity = velocity - 2.0 * dot(velocity, collision_normal) * collision_normal;
+    // // Update velocity if collision occurred (reflection with restitution)
+    // if (collision_occurred) {
+    //     // Component-wise velocity reflection based on the collision normal
+    //     velocity = velocity - 2.0 * dot(velocity, collision_normal) * collision_normal;
         
-        // Apply restitution (energy loss)
-        velocity *= u_restitution;
+    //     // Apply restitution (energy loss)
+    //     velocity *= u_restitution;
         
-        // Store the updated velocity back
-        prop.velocity.xyz = velocity;
-        properties[gid].velocity = prop.velocity;
-    }
+    //     // Store the updated velocity back
+    //     prop.velocity.xyz = velocity;
+    //     properties[gid].velocity = prop.velocity;
+    // }
     
     // Optimized rotation update
     mat3 rotation = mat3(transform);
