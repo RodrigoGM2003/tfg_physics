@@ -74,12 +74,23 @@ namespace utils{
         float radius = std::sqrt(max_distance_squared);
         aabb.extents = glm::vec3(radius);
         
-        std::cout<<"AABB min: "<<aabb.min.x<<", "<<aabb.min.y<<", "<<aabb.min.z<<std::endl;
-        std::cout<<"AABB max: "<<aabb.max.x<<", "<<aabb.max.y<<", "<<aabb.max.z<<std::endl;
-        std::cout<<"AABB center: "<<aabb.center.x<<", "<<aabb.center.y<<", "<<aabb.center.z<<std::endl;
-        std::cout<<"AABB extents: "<<aabb.extents.x<<", "<<aabb.extents.y<<", "<<aabb.extents.z<<std::endl;
+        // std::cout<<"AABB min: "<<aabb.min.x<<", "<<aabb.min.y<<", "<<aabb.min.z<<std::endl;
+        // std::cout<<"AABB max: "<<aabb.max.x<<", "<<aabb.max.y<<", "<<aabb.max.z<<std::endl;
+        // std::cout<<"AABB center: "<<aabb.center.x<<", "<<aabb.center.y<<", "<<aabb.center.z<<std::endl;
+        // std::cout<<"AABB extents: "<<aabb.extents.x<<", "<<aabb.extents.y<<", "<<aabb.extents.z<<std::endl;
         
         return aabb;
+    }
+
+    float calculateRadius(const std::vector<SimpleVertex>& vertices){
+        float radius = 0;
+        for (const auto& vertex : vertices) {
+            const glm::vec3 position = {vertex.position[0], vertex.position[1], vertex.position[2]};
+            float distance = glm::distance(position, glm::vec3(0));
+            if(radius < distance)
+                radius = distance;
+        }
+        return radius;
     }
 
     glm::vec3 scaleFromTransform(const glm::mat4& matrix){

@@ -18,12 +18,13 @@
  */
 class GpuSimulator : public Simulable{ 
 private:
-    std::vector<glm::mat4>* sim_transforms; //SSBO 3
+    std::vector<glm::mat4>* sim_transforms;
     const std::vector<SimpleVertex>* sim_static_vertices; //SimpleVertex data
     const std::vector<unsigned int>* sim_static_indices; //SimpleVertex indices
 
-    std::vector<physics::AABB> sim_aabbs; //SSBO 1
-    std::vector<physics::Properties> sim_properties; //SSBO2
+    std::vector<physics::AABB> sim_aabbs;
+    std::vector<glm::vec4> sim_spheres;
+    std::vector<physics::Properties> sim_properties;
 
     ComputeShader m_transform_shader;
     std::vector<ComputeShader> m_physics_shaders;

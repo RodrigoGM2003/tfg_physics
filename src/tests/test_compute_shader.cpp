@@ -19,10 +19,16 @@ namespace test{
     TestComputeShader::TestComputeShader()
         : m_camera(m_width, m_height, glm::vec3(.0f, 0.0f, 100.0f)) {
 
+        //Object distribution grid
+        int grid_x = 50;
+        int grid_y = 50;
+        int grid_z = 20;
+        m_instances = grid_x * grid_y * grid_z;
+
         // Cube vertices
-        m_vertices = std::vector<SimpleVertex>(std::begin(CONSTANTS::CUBE_MESH_SIMPLE_VERTICES), std::end(CONSTANTS::CUBE_MESH_SIMPLE_VERTICES));
+        m_vertices = std::vector<SimpleVertex>(std::begin(CONSTANTS::ICOSAHEDRON_MESH_SIMPLE_VERTICES), std::end(CONSTANTS::ICOSAHEDRON_MESH_SIMPLE_VERTICES));
     
-        m_indices = std::vector<unsigned int>(std::begin(CONSTANTS::CUBE_MESH_INDICES), std::end(CONSTANTS::CUBE_MESH_INDICES));
+        m_indices = std::vector<unsigned int>(std::begin(CONSTANTS::ICOSAHEDRON_MESH_INDICES), std::end(CONSTANTS::ICOSAHEDRON_MESH_INDICES));
 
         // Initialize m_colors with the number of instances
         m_colors = new std::vector<glm::vec4>(m_instances, glm::vec4(1.0f));
@@ -36,18 +42,10 @@ namespace test{
         //     m_colors->at(i) = glm::vec4(dist(gen), dist(gen), dist(gen), 1.0f);
         // }
         for (int i = 0; i < m_instances; i++) {
-            m_colors->at(i) = glm::vec4(0.2f,0.2f,0.2f, 1.0f);
-        }
-            
-        // Pass these colors to your GpuMesh class
+            m_colors->at(i) = glm::vec4(0.1f,0.1f,0.1f, 1.0f);
+        }   
+
         m_model_matrices = new std::vector<glm::mat4>(m_instances);
-        
-        int grid_x = 50;
-        int grid_y = 50;
-        int grid_z = 20;
-        // int grid_x = 10;
-        // int grid_y = 10;
-        // int grid_z = 10;
         
         float spacing = 5.0f;
 
@@ -69,7 +67,6 @@ namespace test{
         
         m_cube.setData(m_vertices, m_indices, *m_model_matrices, *m_colors, m_instances);
         m_shader.setShader("gpu_renderer.glsl");
-
 
         m_simulator = new GpuSimulator(m_model_matrices, &m_vertices, &m_indices);
 
@@ -105,8 +102,8 @@ namespace test{
         m_shader.bind();
         m_shader.setUniformVec4f("u_light_color", light_color);
         m_shader.setUniformVec3f("u_light_pos", m_camera.getPosition());
-        m_shader.setUniform1f("u_a", m_a);
-        m_shader.setUniform1f("u_b", m_b);
+        m_shader.setUniform1f("u_a", m_quadriatic);
+        m_shader.setUniform1f("u_b", m_linear);
 
         //Place the light
         m_light_shader.bind();
@@ -127,8 +124,8 @@ namespace test{
         
         ImGui::Text("Positions");
         
-        ImGui::SliderFloat("quadratic", &m_a, 0.0f, 0.01f);
-        ImGui::SliderFloat("linear", &m_b, 0.0f, 0.01f);
+        ImGui::SliderFloat("quadratic", &m_quadriatic, 0.0f, 0.01f);
+        ImGui::SliderFloat("linear", &m_linear, 0.0f, 0.01f);
         
         ImGui::SliderFloat("Time factor", &m_time_factor, 0.0f, 100.0f);
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);

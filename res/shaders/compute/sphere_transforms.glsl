@@ -10,10 +10,6 @@ layout(std430, binding = 2) buffer PropertiesBuffer {
     PropertiesStruct properties[];
 };
 
-layout(std430, binding = 3) buffer AABBsBuffer {
-    AABBStruct aabbs[];
-};
-
 layout(std430, binding = 4) buffer ResultsBuffer {
     int results[];
 };
@@ -92,12 +88,6 @@ void main() {
         vec4(new_rotation[2], 0.0),
         vec4(new_position, 1.0)
     );
-
-        // Update AABB with rotation-invariant approach
-    vec3 extents = aabbs[gid].extents.xyz;
-    aabbs[gid].center.xyz = new_position;
-    aabbs[gid].min.xyz = new_position - extents;
-    aabbs[gid].max.xyz = new_position + extents;
 
     spheres[gid].xyz = new_position;
     // spheres[gid].w = max(max(extents.x, extents.y), extents.z);

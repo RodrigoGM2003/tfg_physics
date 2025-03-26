@@ -22,7 +22,7 @@ namespace test{
         const unsigned int m_width = 1920;
         const unsigned int m_height = 1080;
 
-        unsigned int m_instances = 50000;
+        unsigned int m_instances;
         // unsigned int m_instances = 1000;
 
         //Add cube pos 
@@ -49,8 +49,8 @@ namespace test{
 
         Simulable* m_simulator;
 
-        float m_a = 0.00f;
-        float m_b = 0.00f;
+        float m_quadriatic = 0.00f;
+        float m_linear = 0.00f;
 
     public:
         TestComputeShader();

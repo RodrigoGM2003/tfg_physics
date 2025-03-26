@@ -28,6 +28,13 @@ namespace utils{
     physics::AABB calculateAABB(const std::vector<SimpleVertex>& vertices);
 
     /**
+     * @brief Calculate the radius of the minimal sphere that encapsulates the vertices
+     * @param vertices The vertices
+     * @return Radius value
+     */
+    float calculateRadius(const std::vector<SimpleVertex>& vertices);
+
+    /**
      * @brief Get the scale from a transformation matrix
      * @param matrix The transformation matrix
      * @return The scale of the transformation matrix
