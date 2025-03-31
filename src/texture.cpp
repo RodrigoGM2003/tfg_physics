@@ -5,7 +5,7 @@ Texture::Texture(const std::string& filename)
     //Get the path of the file
     m_file_path = __FILE__;
     m_file_path = m_file_path.substr(0, m_file_path.find_last_of("\\/"));
-    m_file_path += "/../res/textures/" + filename;
+    m_file_path += "/../res/mat/" + filename;
 
     GLCall(glGenTextures(1, &m_renderer_id));
     GLCall(glBindTexture(GL_TEXTURE_2D, m_renderer_id));

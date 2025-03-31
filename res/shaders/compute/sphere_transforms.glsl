@@ -6,7 +6,7 @@ layout(std430, binding = 1) buffer TransformBuffer {
     mat4 transforms[];
 };
 
-layout(std430, binding = 2) buffer PropertiesBuffer {
+layout(std430, binding = 5) buffer PropertiesBuffer {
     PropertiesStruct properties[];
 };
 

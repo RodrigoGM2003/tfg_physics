@@ -24,11 +24,11 @@ GpuSimulator::GpuSimulator(
     //Transform update shader
     m_transform_shader.setShader("sphere_transforms.glsl");
     m_transform_shader.bind();
-
-    m_physics_shaders.resize(10, ComputeShader());
-    m_physics_shaders.at(0).setShader("oparallel_naive.glsl");
-    m_physics_shaders.at(0).useTimer(false);
-    m_physics_shaders.at(0).bind();
+    
+    //Narrow phase shader
+    m_broad_phase_shader.setShader("oparallel_naive.glsl");
+    m_broad_phase_shader.useTimer(false);
+    m_broad_phase_shader.bind();
 
     //SSBOs
     m_transform_ssbo.setBuffer(sim_transforms->data(), sim_transforms->size() * sizeof(glm::mat4), GL_DYNAMIC_DRAW);
@@ -44,7 +44,7 @@ GpuSimulator::GpuSimulator(
     m_spheres_ssbo.unbind();
 
     m_transform_ssbo.bindToBindingPoint(1);
-    m_properties_ssbo.bindToBindingPoint(2);
+    m_properties_ssbo.bindToBindingPoint(5);
     m_results_ssbo.bindToBindingPoint(4);
     m_spheres_ssbo.bindToBindingPoint(7);
 }
@@ -55,7 +55,8 @@ GpuSimulator::~GpuSimulator(){
     sim_static_indices = nullptr;
 }
 
-void GpuSimulator::update(float delta_time){    
+void GpuSimulator::update(float delta_time){
+    //Transform phase
     int work_groups = (sim_transforms->size() + 256 - 1) / 256;
     m_transform_shader.bind();
     m_transform_shader.use();
@@ -63,12 +64,25 @@ void GpuSimulator::update(float delta_time){
     m_transform_shader.dispatch(work_groups, 1, 1);
     m_transform_shader.waitForCompletion(GL_SHADER_STORAGE_BARRIER_BIT);
 
+    //Broad phase
+    // OPARALLEL SPHERE
+    // work_groups = (sim_transforms->size() + 8 - 1) / 8;
+    // m_broad_phase_shader.bind();
+    // m_broad_phase_shader.use();
+    // m_broad_phase_shader.dispatch(work_groups * 64, 1, 1);
+    // m_broad_phase_shader.waitForCompletion(GL_SHADER_STORAGE_BARRIER_BIT);
 
-    work_groups = (sim_transforms->size() + 8 - 1) / 8;
-    m_physics_shaders.at(0).bind();
-    m_physics_shaders.at(0).use();
-    m_physics_shaders.at(0).dispatch(work_groups * 64, 1, 1);
-    auto time = m_physics_shaders.at(0).waitForCompletion(GL_SHADER_STORAGE_BARRIER_BIT);
+    // SHARED SPHERE
+    // work_groups = (sim_transforms->size() + 256 - 1) / 256;
+    // m_broad_phase_shader.bind();
+    // m_broad_phase_shader.use();
+    // m_broad_phase_shader.dispatch(work_groups, 1, 1);
+    // m_broad_phase_shader.waitForCompletion(GL_SHADER_STORAGE_BARRIER_BIT);
+
+    
+    //Narrow phase
+
+    //Resolution phase
 
     // std::cout<<time<<std::endl;
 }

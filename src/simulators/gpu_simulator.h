@@ -27,7 +27,7 @@ private:
     std::vector<physics::Properties> sim_properties;
 
     ComputeShader m_transform_shader;
-    std::vector<ComputeShader> m_physics_shaders;
+    ComputeShader m_broad_phase_shader;
 
     ShaderStorageBuffer m_transform_ssbo;
     ShaderStorageBuffer m_aabbs_ssbo;

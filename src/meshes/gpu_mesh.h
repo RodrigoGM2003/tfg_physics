@@ -24,10 +24,13 @@ protected:
     const std::vector<unsigned int>* m_indices; //Vertex indices
 
     const std::vector<glm::mat4>* m_model_matrices; 
-    const std::vector<glm::vec4>* m_model_colors; 
+    const std::vector<glm::vec4>* m_model_colors;
 
     VertexArray m_va; //Vertex Array
     IndexBuffer m_ib; //Index Buffer
+
+    ShaderStorageBuffer m_position_ssbo;
+    ShaderStorageBuffer m_normal_ssbo;
     ShaderStorageBuffer m_color_ssbo;
 
 public:
