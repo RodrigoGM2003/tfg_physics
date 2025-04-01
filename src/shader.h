@@ -49,6 +49,11 @@ public:
      */
     void unbind() const;
 
+
+    
+    void setUniform1i(const std::string& name, int v0); 
+
+
     /**
      * @brief Sets a uniform of type float
      * @param name the name of the uniform

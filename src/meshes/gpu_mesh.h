@@ -8,6 +8,7 @@
 
 #include "glm/glm.hpp"
 
+
 #include "../buffers/vertex_buffer.h"
 #include "../buffers/index_buffer.h"
 #include "../buffers/vertex_array.h"
@@ -33,6 +34,9 @@ protected:
     ShaderStorageBuffer m_normal_ssbo;
     ShaderStorageBuffer m_color_ssbo;
 
+    std::vector<glm::vec2> m_texCoords;
+    ShaderStorageBuffer m_texcoord_ssbo;
+
 public:
     /**
      * @brief Construct a new Instanced Mesh object
@@ -48,6 +52,9 @@ public:
      * @brief Get the index buffer
      */
     inline const IndexBuffer& getIndexBuffer() const { return m_ib; }
+
+
+    void generateTextureCoordinates();
     
     /**
      * @brief Set the data

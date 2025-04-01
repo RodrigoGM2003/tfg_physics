@@ -4,6 +4,10 @@
 #include <cstring>  // 'strlen' (to compile shaders)
 #include <iostream> // 'cout' and such
 #include <string>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <direct.h>
+
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -22,6 +26,8 @@
 #include "tests/test_multiple.h"
 #include "tests/test_lights.h"
 #include "tests/test_compute_shader.h"
+
+
 
 //Global variables
 GLFWwindow * c_window = nullptr; /*Main Window*/

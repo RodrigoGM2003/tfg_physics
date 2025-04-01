@@ -17,7 +17,8 @@ extern GLFWwindow * c_window;
 namespace test{
 
     TestComputeShader::TestComputeShader()
-        : m_camera(m_width, m_height, glm::vec3(0.0f, 0.0f, 100.0f)) {
+        : m_camera(m_width, m_height, glm::vec3(0.0f, 0.0f, 100.0f)),
+        m_noise_intensity(0.3f) {
 
         //Object distribution grid
         // int grid_x = 37;
@@ -69,11 +70,18 @@ namespace test{
         }
         
         m_cube.setData(m_vertices, m_indices, *m_model_matrices, *m_colors, m_instances);
-        m_shader.setShader("gpu_renderer.glsl");
+        m_shader.setShader("tex_gpu_renderer.glsl");
 
         m_simulator = new GpuSimulator(m_model_matrices, &m_vertices, &m_indices);
 
         m_light_shader.setShader("light.glsl");
+
+        try {
+            m_noiseTexture = std::make_unique<Texture>("noise512.png"); // Ensure you have a noise texture file
+        } catch (std::exception& e) {
+            std::cerr << "Failed to load noise texture: " << e.what() << std::endl;
+            m_noiseTexture = nullptr;
+        }
 
         GLCall(glViewport(0, 0, m_width, m_height));
         GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
@@ -97,23 +105,30 @@ namespace test{
 
     void TestComputeShader::onRender(){
         Renderer renderer;
-
+    
         m_camera.input(c_window);
         m_camera.updateMatrix(55.0f, 0.1f, 10000.0f);
-
-        //Place the cube 
+    
+        // Bind the noise texture
+        if (m_noiseTexture)
+            m_noiseTexture->bind(0); // Bind to texture slot 0
+    
+        // Place the cube 
         m_shader.bind();
         m_shader.setUniformVec4f("u_light_color", light_color);
         m_shader.setUniformVec3f("u_light_pos", m_camera.getPosition());
+        m_shader.setUniformVec3f("u_cam_pos", m_camera.getPosition());
         m_shader.setUniform1f("u_a", m_quadriatic);
         m_shader.setUniform1f("u_b", m_linear);
-
-        //Place the light
-        m_light_shader.bind();
-        m_light_shader.setUniformVec4f("u_light_color", light_color);
-
-        //Draw the cube
+        m_shader.setUniform1i("u_noise_texture", 0); // Set texture unit
+        m_shader.setUniform1f("u_noise_intensity", m_noise_intensity); // Add noise intensity control
+    
+        // Draw the cube
         renderer.instancedDraw(m_cube.getVertexArray(), m_cube.getIndexBuffer(), m_shader, m_camera, m_instances);
+        
+        // Unbind texture
+        if (m_noiseTexture)
+            m_noiseTexture->unbind();
     }
 
 
@@ -132,5 +147,8 @@ namespace test{
         
         ImGui::SliderFloat("Time factor", &m_time_factor, 0.0f, 100.0f);
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+
+        ImGui::Text("Texture Settings");
+        ImGui::SliderFloat("Noise Intensity", &m_noise_intensity, 0.0f, 1.0f);
     }
 }

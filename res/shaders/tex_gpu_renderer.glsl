@@ -1,4 +1,3 @@
-
 #shader vertex
 #version 440 core
 
@@ -14,13 +13,13 @@ layout(std430, binding = 4) buffer ResultsBuffer {
     int results[];
 };
 
-// Shared SSBO with compute shader
+// Shared SSBO with compute shader - use the same binding point (10)
 layout(std430, binding = 10) buffer ColorBuffer {
     vec4 colors[];
 };
 
-// SSBO for texture coordinates
-layout(std430, binding = 5) buffer TexCoordBuffer {
+// Texture coordinates SSBO
+layout(std430, binding = 11) buffer TexCoordBuffer {
     vec2 texCoords[];
 };
 
@@ -42,16 +41,14 @@ void main() {
     // Transform to clip space
     gl_Position = u_cam_matrix * worldPos;
     
-    // Extract rotation matrix for normal transformation
+    // Extract rotation matrix for normal transformation (more efficient)
     mat3 normalMatrix = mat3(transform);
     v_normal = normalMatrix * normal;
     
-    // Get texture coordinates from SSBO
-    // This assumes one texture coordinate per vertex
-    int texCoordIndex = gl_VertexID % 3; // For triangles (3 vertices)
-    v_texCoord = texCoords[texCoordIndex];
+    // Get texture coordinate from SSBO based on vertex ID
+    v_texCoord = texCoords[gl_VertexID];
     
-    // Pass the base color to fragment shader
+    // Use constant color from uniform (or keep using attribute if needed)
     v_color = results[gl_InstanceID] > 0 ? vec4(1.0f, 0.0f, 0.0f, 1.0f) : colors[gl_InstanceID];
 }
 
@@ -71,36 +68,36 @@ uniform vec3 u_cam_pos;
 
 uniform float u_a;
 uniform float u_b;
-uniform sampler2D u_noise_texture; // White noise texture
-uniform float u_noise_intensity = 0.3; // Control noise influence
+uniform sampler2D u_noise_texture;
+uniform float u_noise_intensity = 0.3; // Default noise intensity
 
 // Optimized point light calculation
 vec4 pointLight(vec4 base_color) {
-    // Light direction and distance calculations
+    // Light direction and distance calculations (optimized)
     vec3 light_vector = u_light_pos - v_position;
     float distance_squared = dot(light_vector, light_vector);
     float distance = sqrt(distance_squared);
     
-    // Intensity calculation
+    // More efficient intensity calculation
     float intensity = 1.0 / (u_a * distance_squared + u_b * distance + 1.0);
     
-    // Normalize vectors
+    // Normalize vectors once
     vec3 normal = normalize(v_normal);
     vec3 light_dir = normalize(light_vector);
     
-    // Calculate diffuse
+    // Calculate diffuse once
     float diffuse = max(dot(normal, light_dir), 0.0);
     float ambient = 0.2;
     
-    // Calculate lighting
+    // Avoid specular calculation if diffuse is zero
     vec4 final_color = base_color * u_light_color * (diffuse + ambient) * intensity;
     
-    // Only calculate specular if diffuse > 0
+    // Only calculate specular if diffuse > 0 (avoid branch with step function)
     if (diffuse > 0.0) {
         float specular_light = 0.5;
         vec3 view_dir = normalize(u_cam_pos - v_position);
         
-        // Blinn-Phong halfway vector
+        // Blinn-Phong halfway vector (more efficient than reflect)
         vec3 halfway_dir = normalize(light_dir + view_dir);
         
         // Specular term
@@ -116,7 +113,6 @@ void main() {
     float noise = texture(u_noise_texture, v_texCoord).r;
     
     // Apply noise to the base color while preserving the original color's hue
-    // Mix between full color and a noise-modulated version
     vec4 noisy_color = v_color * (1.0 - u_noise_intensity + u_noise_intensity * noise);
     
     // Calculate lighting with the noise-modulated color

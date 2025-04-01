@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include "test.h"
 
 #include "../buffers/vertex_buffer.h"
@@ -14,6 +16,7 @@
 #include "../meshes/mesh.h"
 #include "../meshes/gpu_mesh.h"
 #include "../simulators/gpu_simulator.h"
+#include "../texture.h"
 
 namespace test{
 
@@ -48,6 +51,9 @@ namespace test{
         std::vector<glm::mat4> m_cube_models;
 
         Simulable* m_simulator;
+
+        std::unique_ptr<Texture> m_noiseTexture;
+        float m_noise_intensity;
 
         float m_quadriatic = 0.00f;
         float m_linear = 0.00f;
