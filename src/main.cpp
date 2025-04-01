@@ -7,6 +7,12 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <direct.h>
+#include <sstream>
+#include <thread>
+#include <queue>
+#include <mutex>
+#include <condition_variable>
+#include <vector>
 
 
 #include "glm/glm.hpp"
@@ -27,18 +33,66 @@
 #include "tests/test_lights.h"
 #include "tests/test_compute_shader.h"
 
-
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
 
 //Global variables
 GLFWwindow * c_window = nullptr; /*Main Window*/
 
 int
-    w_width  = 1920, /*Window width*/
-    w_height = 1080 ; /*Window heigth*/
+    w_width  = 512, /*Window width*/
+    w_height = 512 ; /*Window heigth*/
 
 bool terminate_program = false; /*Program termination*/
+bool record = true;
 
 unsigned int samples = 4; /*Number of samples*/
+
+
+void createDirectory(const std::string &path) {
+    #ifdef _WIN32
+        _mkdir(path.c_str());
+    #endif
+}
+
+void saveFrame(int test_index, int frame_index, int width, int height) {
+    // Allocate memory for the pixel data (3 channels: RGB)
+    std::vector<unsigned char> pixels(width * height * 3);
+    // Read pixels from the framebuffer (bottom-left origin)
+    glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels.data());
+    
+    // (Optional) Flip the image vertically if needed.
+    // This step is often required since OpenGL's origin is bottom-left.
+    std::vector<unsigned char> flipped(pixels.size());
+    int rowSize = width * 3;
+    for (int y = 0; y < height; ++y) {
+        memcpy(&flipped[y * rowSize], &pixels[(height - 1 - y) * rowSize], rowSize);
+    }
+    
+    // Create folder path for the current test using zero-padded test_index (e.g., "000")
+    std::ostringstream folderStream;
+    folderStream << "../../../out/videos/" << std::setfill('0') << std::setw(3) << test_index << "/";
+    std::string folderPath = folderStream.str();
+    
+    // Create the directory if it doesn't exist
+    createDirectory(folderPath);
+    
+    // Create the filename using zero-padded frame_index (e.g., "00000000.png")
+    std::ostringstream filenameStream;
+    filenameStream << folderPath << std::setfill('0') << std::setw(8) << frame_index << ".png";
+    std::string filename = filenameStream.str();
+    
+    // Write the image as a PNG (ensure you have stb_image_write integrated)
+    std::cout<<filename.c_str()<<std::endl;
+    if(stbi_write_png(filename.c_str(), width, height, 3, flipped.data(), width * 3)) {
+        std::cout << "Saved frame to " << filename << std::endl;
+    } else {
+        std::cerr << "Failed to save frame to " << filename << std::endl;
+    }
+}
+
+
+
 
 /**
  * @brief Initializes GLFW
@@ -73,13 +127,6 @@ void initGLFW(int argc, char * argv[]){
 
     //Get the framebuffer size
     glfwGetFramebufferSize(c_window, &w_width, &w_height);
-
-    // CON ESTO GESTION DE EVENTOS
-//     glfwSetFramebufferSizeCallback( ventana_glfw, FGE_CambioTamano );
-//     glfwSetKeyCallback            ( ventana_glfw, FGE_PulsarLevantarTecla );
-//     glfwSetMouseButtonCallback    ( ventana_glfw, FGE_PulsarLevantarBotonRaton);
-//     glfwSetCursorPosCallback      ( ventana_glfw, FGE_MovimientoRaton );
-//     glfwSetScrollCallback         ( ventana_glfw, FGE_Scroll );
 }
 
 /**
@@ -143,22 +190,19 @@ void mainLoop(){
     double last_frame_time = glfwGetTime();
     float delta_time = 0.0f;
 
-    //Check for program termination
+    int test_index = 0; // Update this per test, perhaps when switching tests.
+    int frame_index = 0; // Reset this for each test or keep a global count as needed.
+
     while ( !terminate_program )
     {
         double current_frame_time = glfwGetTime();
-        delta_time = static_cast<float>(current_frame_time - last_frame_time);
+        float delta_time = static_cast<float>(current_frame_time - last_frame_time);
         last_frame_time = current_frame_time;
-
-        // Cap delta time to prevent "spiral of death" with very low framerates
         if (delta_time > 0.25f)
             delta_time = 0.25f;
 
-        //Set the viewport
-        // GLCall(glViewport(0, 0, w_width, w_height));
-        GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         renderer.clear();
-
 
         ImGui_ImplGlfw_NewFrame();
         ImGui_ImplOpenGL3_NewFrame();
@@ -177,16 +221,20 @@ void mainLoop(){
         }
 
         ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); // ERROR
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
+        // Save the current frame using the function above.
+        // Ensure 'w_width' and 'w_height' are your viewport dimensions.
+        if(record)
+            saveFrame(test_index, frame_index, w_width, w_height);
+        ++frame_index;
 
-        //Swap buffers and poll events
-        glfwSwapBuffers( c_window );
+        glfwSwapBuffers(c_window);
         glfwPollEvents();
 
-        //Check for program termination
-        terminate_program = glfwWindowShouldClose( c_window ) || terminate_program;
+        terminate_program = glfwWindowShouldClose(c_window) || terminate_program;
     }
+
 
     delete current_test;
     if (current_test != test_menu)
