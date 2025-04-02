@@ -22,8 +22,8 @@ namespace test{
 
     class TestComputeShader : public Test{
     private:
-        const unsigned int m_width = 512;
-        const unsigned int m_height = 512;
+        const unsigned int m_width = 1920;
+        const unsigned int m_height = 1080;
 
         unsigned int m_instances;
         // unsigned int m_instances = 1000;

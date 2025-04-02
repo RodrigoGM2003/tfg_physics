@@ -21,12 +21,12 @@ namespace test{
         m_noise_intensity(0.3f) {
 
         //Object distribution grid
-        // int grid_x = 37;
-        // int grid_y = 37;
-        // int grid_z = 37;
-        int grid_x = 100;
-        int grid_y = 100;
-        int grid_z = 100;
+        int grid_x = 37;
+        int grid_y = 37;
+        int grid_z = 37;
+        // int grid_x = 100;
+        // int grid_y = 100;
+        // int grid_z = 100;
         m_instances = grid_x * grid_y * grid_z;
 
         // Cube vertices
@@ -42,12 +42,12 @@ namespace test{
         static std::mt19937 gen(rd());
         std::uniform_real_distribution<float> dist(0.0f, 1.0f);
 
-        for (int i = 0; i < m_instances; i++) {
-            m_colors->at(i) = glm::vec4(dist(gen), dist(gen), dist(gen), 1.0f);
-        }
         // for (int i = 0; i < m_instances; i++) {
-        //     m_colors->at(i) = glm::vec4(0.2f,0.2f,0.2f, 1.0f);
-        // }   
+        //     m_colors->at(i) = glm::vec4(dist(gen), dist(gen), dist(gen), 1.0f);
+        // }
+        for (int i = 0; i < m_instances; i++) {
+            m_colors->at(i) = glm::vec4(0.2f,0.2f,0.2f, 1.0f);
+        }   
 
         m_model_matrices = new std::vector<glm::mat4>(m_instances);
         

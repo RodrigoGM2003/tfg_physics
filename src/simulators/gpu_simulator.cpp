@@ -26,7 +26,7 @@ GpuSimulator::GpuSimulator(
     m_transform_shader.bind();
     
     //Narrow phase shader
-    m_broad_phase_shader.setShader("oparallel_naive.glsl");
+    m_broad_phase_shader.setShader("collision_naive.glsl");
     m_broad_phase_shader.useTimer(false);
     m_broad_phase_shader.bind();
 
@@ -66,11 +66,11 @@ void GpuSimulator::update(float delta_time){
 
     //Broad phase
     // OPARALLEL SPHERE
-    // work_groups = (sim_transforms->size() + 8 - 1) / 8;
-    // m_broad_phase_shader.bind();
-    // m_broad_phase_shader.use();
-    // m_broad_phase_shader.dispatch(work_groups * 64, 1, 1);
-    // m_broad_phase_shader.waitForCompletion(GL_SHADER_STORAGE_BARRIER_BIT);
+    work_groups = (sim_transforms->size() + 8 - 1) / 8;
+    m_broad_phase_shader.bind();
+    m_broad_phase_shader.use();
+    m_broad_phase_shader.dispatch(work_groups * 64, 1, 1);
+    m_broad_phase_shader.waitForCompletion(GL_SHADER_STORAGE_BARRIER_BIT);
 
     // SHARED SPHERE
     // work_groups = (sim_transforms->size() + 256 - 1) / 256;
