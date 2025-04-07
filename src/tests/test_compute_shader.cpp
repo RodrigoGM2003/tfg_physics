@@ -30,28 +30,29 @@ namespace test{
         m_instances = grid_x * grid_y * grid_z;
 
         // Cube vertices
-        m_vertices = std::vector<SimpleVertex>(std::begin(CONSTANTS::ICOSAHEDRON_MESH_SIMPLE_VERTICES), std::end(CONSTANTS::ICOSAHEDRON_MESH_SIMPLE_VERTICES));
+        m_vertices = std::vector<SimpleVertex>(std::begin(CONSTANTS::CUBE_MESH_SIMPLE_VERTICES), std::end(CONSTANTS::CUBE_MESH_SIMPLE_VERTICES));
     
-        m_indices = std::vector<unsigned int>(std::begin(CONSTANTS::ICOSAHEDRON_MESH_INDICES), std::end(CONSTANTS::ICOSAHEDRON_MESH_INDICES));
+        m_indices = std::vector<unsigned int>(std::begin(CONSTANTS::CUBE_MESH_INDICES), std::end(CONSTANTS::CUBE_MESH_INDICES));
 
         // Initialize m_colors with the number of instances
         m_colors = new std::vector<glm::vec4>(m_instances, glm::vec4(1.0f));
 
         // Generate random colors for each instance
         std::random_device rd;
-        static std::mt19937 gen(rd());
+        // static std::mt19937 gen(rd());
+        static std::mt19937 gen(42);
         std::uniform_real_distribution<float> dist(0.0f, 1.0f);
 
-        // for (int i = 0; i < m_instances; i++) {
-        //     m_colors->at(i) = glm::vec4(dist(gen), dist(gen), dist(gen), 1.0f);
-        // }
         for (int i = 0; i < m_instances; i++) {
-            m_colors->at(i) = glm::vec4(0.2f,0.2f,0.2f, 1.0f);
-        }   
+            m_colors->at(i) = glm::vec4(dist(gen), dist(gen), dist(gen), 1.0f);
+        }
+        // for (int i = 0; i < m_instances; i++) {
+        //     m_colors->at(i) = glm::vec4(0.2f,0.2f,0.2f, 1.0f);
+        // }   
 
         m_model_matrices = new std::vector<glm::mat4>(m_instances);
         
-        float spacing = 5.0f;
+        float spacing = 3.0f;
 
         // Calculate center offset
         glm::vec3 center_offset = glm::vec3((grid_x - 1) * 0.5f * spacing, 

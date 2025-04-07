@@ -10,12 +10,22 @@ layout(std430, binding = 7) buffer SphereBuffer {
     vec4 spheres[];
 };
 
-layout(std430, binding = 8) buffer CollisionPairsBuffer {
-    ivec2 collision_pairs[];
-    uint collision_count;
+layout(std430, binding = 20) buffer CollisionPairsBuffer {
+    ivec2 collisionPairs[];
 };
 
+layout(std430, binding = 21) buffer CollisionCountBuffer{
+    uint collisionCount;
+};
+
+layout(std430, binding = 22) buffer SecondResultsBuffer{
+    uint second_results[];
+};
+
+
+
 layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+
 
 void main() {
     uint gid = gl_GlobalInvocationID.x / 64;
@@ -26,27 +36,26 @@ void main() {
 
     if(start == 0){
         results[gid] = 0;
+        second_results[gid] = 0;
+
         // Initialize collision count if this is the first invocation
-        if(gid == 0) collision_count = 0;
+        if(gid == 0) collisionCount = 0;
     }
     barrier();
 
     vec4 current = spheres[gid];
-
-    for (uint i = start; i < spheres.length(); i+=64) {
-        if(i <= gid) continue; // Only check each pair once
-        
+    for (uint i = gid + 1 + start; i < spheres.length(); i+=64) {
         vec4 other = spheres[i];
         float r = current.w + other.w;
+
+        float distSquared = dot(current.xyz - other.xyz, current.xyz - other.xyz);
+        bool isCollision = distSquared <= r * r;
         
         if(dot(current.xyz - other.xyz, current.xyz - other.xyz) <= r * r) {
-            // This is a potential collision
-            atomicAdd(results[gid], 1);
-            
             // Add collision pair to the buffer
-            uint index = atomicAdd(collision_count, 1);
-            if(index < collision_pairs.length()) {
-                collision_pairs[index] = ivec2(gid, i);
+            uint index = atomicAdd(collisionCount, 1);
+            if(index < collisionPairs.length()) {
+                collisionPairs[index] = ivec2(gid, i);
             }
         }
     }

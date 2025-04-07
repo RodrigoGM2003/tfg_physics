@@ -13,6 +13,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <vector>
+#include <algorithm>
 
 
 #include "glm/glm.hpp"
@@ -44,13 +45,20 @@
 GLFWwindow * c_window = nullptr; /*Main Window*/
 
 int
-    w_width  = 1920, /*Window width*/
-    w_height = 1080; /*Window heigth*/
+    w_width  = 1024, /*Window width*/
+    w_height = 1024; /*Window heigth*/
 
 bool terminate_program = false; /*Program termination*/
 bool record = false;
 
 unsigned int samples = 4; /*Number of samples*/
+
+unsigned int skip_frames = 2;
+
+int test_index = 4; // Update this per test, perhaps when switching tests.
+int frame_index = 0; // Reset this for each test or keep a global count as needed.
+
+
 
 
 void createDirectory(const std::string &path) {
@@ -58,41 +66,6 @@ void createDirectory(const std::string &path) {
         _mkdir(path.c_str());
     #endif
 }
-
-// void saveFrame(int test_index, int frame_index, int width, int height) {
-//     // Allocate memory for the pixel data (3 channels: RGB)
-//     std::vector<unsigned char> pixels(width * height * 3);
-//     // Read pixels from the framebuffer (bottom-left origin)
-//     glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels.data());
-    
-//     // (Optional) Flip the image vertically if needed.
-//     // This step is often required since OpenGL's origin is bottom-left.
-//     std::vector<unsigned char> flipped(pixels.size());
-//     int rowSize = width * 3;
-//     for (int y = 0; y < height; ++y) {
-//         memcpy(&flipped[y * rowSize], &pixels[(height - 1 - y) * rowSize], rowSize);
-//     }
-    
-//     // Create folder path for the current test using zero-padded test_index (e.g., "000")
-//     std::ostringstream folderStream;
-//     folderStream << "../../../out/videos/" << std::setfill('0') << std::setw(3) << test_index << "/";
-//     std::string folderPath = folderStream.str();
-    
-//     // Create the directory if it doesn't exist
-//     createDirectory(folderPath);
-    
-//     // Create the filename using zero-padded frame_index (e.g., "00000000.png")
-//     std::ostringstream filenameStream;
-//     filenameStream << folderPath << std::setfill('0') << std::setw(8) << frame_index << ".png";
-//     std::string filename = filenameStream.str();
-    
-//     // Write the image as a PNG (ensure you have stb_image_write integrated)
-//     std::cout<<filename.c_str()<<std::endl;
-//     if(!stbi_write_png(filename.c_str(), width, height, 3, flipped.data(), width * 3)) {
-//         std::cerr << "Failed to save frame to " << filename << std::endl;
-//     }
-// }
-
 
 // Define a structure to hold frame data.
 struct FrameData {
@@ -122,7 +95,7 @@ void frameSaver() {
             
             // Construct folder path and filename as before
             std::ostringstream folderStream;
-            folderStream << "../../../out/videos/" << std::setfill('0') << std::setw(3) << frame.test_index << "/";
+            folderStream << "E:/datasets/REDS/sim_dataset/target/" << std::setfill('0') << std::setw(3) << frame.test_index << "/";
             std::string folderPath = folderStream.str();
             createDirectory(folderPath);
             
@@ -194,7 +167,7 @@ void initGLFW(int argc, char * argv[]){
     //Make the context current
     glfwMakeContextCurrent( c_window );
 
-    glfwSwapInterval(1); //VSync
+    glfwSwapInterval(skip_frames); //VSync
 
     //Get the framebuffer size
     glfwGetFramebufferSize(c_window, &w_width, &w_height);
@@ -237,128 +210,6 @@ void initOpenGL(){
     GLCall(glDisable( GL_CULL_FACE ));
 }
 
-/**
- * @brief Simulator's main loop1
- */
-// void mainLoop(){
-//     Renderer renderer;
-
-//     ImGui::CreateContext();
-//     ImGuiIO& io = ImGui::GetIO(); (void)io;
-//     ImGui_ImplGlfw_InitForOpenGL(c_window, true);
-//     ImGui_ImplOpenGL3_Init();
-//     ImGui::StyleColorsDark();
-
-//     test::Test* current_test = nullptr;
-//     test::TestMenu* test_menu = new test::TestMenu(current_test);
-//     current_test = test_menu;
-//     test_menu->registerTest<test::TestRefactor>("Refactor");
-//     test_menu->registerTest<test::TestMultiple>("Multiple");
-//     test_menu->registerTest<test::TestLights>("Lights");
-//     test_menu->registerTest<test::TestComputeShader>("ComputeShader");
-
-//     // Variables to handle key press state
-//     bool r_key_pressed = false;
-
-//     double last_frame_time = glfwGetTime();
-//     float delta_time = 0.0f;
-
-//     int test_index = 0; // Update this per test, perhaps when switching tests.
-//     int frame_index = 0; // Reset this for each test or keep a global count as needed.
-
-//     std::thread saverThread(frameSaver);
-
-//     while ( !terminate_program )
-//     {
-//         double current_frame_time = glfwGetTime();
-//         float delta_time = static_cast<float>(current_frame_time - last_frame_time);
-//         last_frame_time = current_frame_time;
-//         if (delta_time > 0.25f)
-//             delta_time = 0.25f;
-
-//         // Handle 'R' key press to toggle recording
-//         if (glfwGetKey(c_window, GLFW_KEY_R) == GLFW_PRESS) {
-//             std::cout<<"ELDIABLO"<<std::endl;
-//             if (!r_key_pressed) {
-//                 // Only toggle if we're not in the test menu
-//                 if (current_test != test_menu) {
-//                     record = !record;
-//                     std::cout << "Recording " << (record ? "started" : "stopped") << std::endl;
-                    
-//                     // If we start recording, reset frame index
-//                     if (record) {
-//                         frame_index = 0;
-//                     }
-//                 }
-//                 r_key_pressed = true;
-//             }
-//         } else {
-//             r_key_pressed = false;
-//         }
-
-//         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-//         renderer.clear();
-
-//         // Always initialize ImGui for the frame, even when recording
-//         ImGui_ImplGlfw_NewFrame();
-//         ImGui_ImplOpenGL3_NewFrame();
-//         ImGui::NewFrame();
-
-//         if (current_test){
-//             current_test->onUpdate(delta_time);
-//             current_test->onRender();
-            
-//             ImGui::Begin("Test");
-//             if (current_test != test_menu && ImGui::Button("<-")){
-//                 // If we're recording, stop recording when going back to menu
-//                 if (record) {
-//                     record = false;
-//                     std::cout << "Recording stopped due to test exit" << std::endl;
-//                 }
-//                 delete current_test;
-//                 current_test = test_menu;
-//             }
-            
-//             // Only render ImGui test content if not recording
-//             if (!record) {
-//                 current_test->onImGuiRender();
-//             }
-//             ImGui::End();
-//         }
-
-//         // Always render ImGui, but if recording, don't display it
-//         ImGui::Render();
-//         if (!record) {
-//             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-//         }
-
-//         // Save the frame if we're recording and not in the test menu
-//         if (record && current_test != test_menu) {
-//             // Make sure the current OpenGL context is ready for frame capture
-//             glFinish();
-//             saveFrameAsync(test_index, frame_index, w_width, w_height);
-//             frame_index++;
-//             if(frame_index > 50)
-//                 record = false;
-//         }
-
-//         glfwSwapBuffers(c_window);
-//         glfwPollEvents();
-
-//         terminate_program = glfwWindowShouldClose(c_window) || terminate_program;
-//     }
-
-//     {
-//         std::lock_guard<std::mutex> lock(queueMutex);
-//         recordingActive = false;
-//     }
-//     queueCV.notify_one();
-//     saverThread.join();
-
-//     delete current_test;
-//     if (current_test != test_menu)
-//         delete test_menu;
-// }
 void mainLoop() {
     Renderer renderer;
 
@@ -381,14 +232,12 @@ void mainLoop() {
 
     // Frame rate limiting variables
     const int target_fps = 30;              // Target frames per second
-    const double frame_time = 1.0 / target_fps;  // Time per frame in seconds
+    const double frame_time = 1.0 / (144.0f / skip_frames);  // Time per frame in seconds
     double last_frame_time = glfwGetTime();
     double delta_time = 0.0f;
 
-    int test_index = 0; // Update this per test, perhaps when switching tests.
-    int frame_index = 0; // Reset this for each test or keep a global count as needed.
-
     std::thread saverThread(frameSaver);
+
 
     while (!terminate_program) {
         // Calculate frame start time
@@ -397,7 +246,7 @@ void mainLoop() {
         // Calculate time since last frame
         delta_time = frame_start_time - last_frame_time;
         last_frame_time = frame_start_time;
-        
+
         // Cap delta time to prevent large jumps
         if (delta_time > 0.25f)
             delta_time = 0.25f;
@@ -463,7 +312,7 @@ void mainLoop() {
             glFinish();
             saveFrameAsync(test_index, frame_index, w_width, w_height);
             frame_index++;
-            if (frame_index > 50)
+            if (frame_index >= 100)
                 record = false;
         }
 
@@ -471,29 +320,13 @@ void mainLoop() {
         glfwPollEvents();
 
         terminate_program = glfwWindowShouldClose(c_window) || terminate_program;
-
-        // // Calculate how much time the frame took
-        // double frame_end_time = glfwGetTime();
-        // double frame_duration = frame_end_time - frame_start_time;
-        
-        // // If we completed the frame faster than our target frame time, sleep for the remainder
-        // if (frame_duration < frame_time) {
-        //     // Calculate how much time to sleep
-        //     double sleep_time = frame_time - frame_duration;
-            
-        //     // Convert to milliseconds and sleep
-        //     int sleep_ms = static_cast<int>(sleep_time * 1000.0);
-            
-        //     #ifdef _WIN32
-        //         Sleep(sleep_ms);
-        //     #endif
-        // }
     }
 
     {
         std::lock_guard<std::mutex> lock(queueMutex);
         recordingActive = false;
     }
+
     queueCV.notify_one();
     saverThread.join();
 

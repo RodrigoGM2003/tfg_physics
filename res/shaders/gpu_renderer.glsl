@@ -26,6 +26,7 @@ layout(std430, binding = 10) buffer ColorBuffer {
     vec4 colors[];
 };
 
+
 uniform mat4 u_cam_matrix;
 uniform vec4 u_instance_color; // New uniform for constant color
 
@@ -48,8 +49,9 @@ void main() {
     mat3 normalMatrix = mat3(transform);
     v_normal = normalMatrix * normal;
     
-    // Use constant color from uniform (or keep using attribute if needed)
-    v_color = results[gl_InstanceID] > 0 ? vec4(1.0f, 0.0f, 0.0f, 1.0f) : colors[gl_InstanceID];
+
+
+    vec4 new_color = results[gl_InstanceID] > 0 ? vec4(1.0f, 0.0f, 0.0f, 1.0f) : colors[gl_InstanceID];
 }
 
 #shader fragment

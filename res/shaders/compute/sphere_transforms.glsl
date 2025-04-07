@@ -90,5 +90,4 @@ void main() {
     );
 
     spheres[gid].xyz = new_position;
-    // spheres[gid].w = max(max(extents.x, extents.y), extents.z);
 }

@@ -30,6 +30,11 @@ namespace physics{
 
         alignas(16) glm::vec3 angular_velocity;
         alignas(16) glm::vec3 angular_acceleration;
+
+        alignas(16) float inverseMass;
+        alignas(16) glm::mat3 inverseInertiaTensor;
+        
+        alignas(16) double friction;
     };
 
     /**

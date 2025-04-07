@@ -10,4 +10,7 @@ struct PropertiesStruct {
     vec4 acceleration;
     vec4 angular_velocity;
     vec4 angular_acceleration;
+    float inverseMass;
+    mat3 inverseInertiaTensor;
+    float friction;
 };

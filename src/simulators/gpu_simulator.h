@@ -26,14 +26,28 @@ private:
     std::vector<glm::vec4> sim_spheres;
     std::vector<physics::Properties> sim_properties;
 
+    std::vector<glm::vec4> m_object_vertices; 
+    std::vector<glm::vec4> m_object_normals; 
+    std::vector<glm::vec4> m_object_edges; 
+
+
     ComputeShader m_transform_shader;
     ComputeShader m_broad_phase_shader;
+    ComputeShader m_narrow_phase_shader;
 
     ShaderStorageBuffer m_transform_ssbo;
     ShaderStorageBuffer m_aabbs_ssbo;
     ShaderStorageBuffer m_properties_ssbo;
     ShaderStorageBuffer m_results_ssbo;
     ShaderStorageBuffer m_spheres_ssbo;
+    ShaderStorageBuffer m_collision_pair_ssbo;
+    ShaderStorageBuffer m_collision_count_ssbo;
+    ShaderStorageBuffer m_second_results_ssbo;
+    ShaderStorageBuffer m_object_vertices_ssbo;
+    ShaderStorageBuffer m_object_normals_ssbo;
+    ShaderStorageBuffer m_object_edges_ssbo;
+
+    unsigned int m_zero = 0;
 
 public:
     /**
@@ -55,10 +69,6 @@ public:
     void update(float delta_time) override;
 
 private:
-    /**
-     * @brief take a step for each object
-     */
-    void updateObject(physics::GpuObject& object, float delta_time);
 
     /**
      * @brief Initializes the data for the sumulation

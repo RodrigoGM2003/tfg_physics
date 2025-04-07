@@ -23,6 +23,11 @@ layout(std430, binding = 11) buffer TexCoordBuffer {
     vec2 texCoords[];
 };
 
+
+layout(std430, binding = 22) buffer SecondResultsBuffer {
+    int second_results[];
+};
+
 uniform mat4 u_cam_matrix;
 
 out vec3 v_normal;
@@ -49,7 +54,21 @@ void main() {
     v_texCoord = texCoords[gl_VertexID];
     
     // Use constant color from uniform (or keep using attribute if needed)
-    v_color = results[gl_InstanceID] > 0 ? vec4(1.0f, 0.0f, 0.0f, 1.0f) : colors[gl_InstanceID];
+    // v_color = results[gl_InstanceID] > 0 ? vec4(1.0f, 0.0f, 0.0f, 1.0f) : colors[gl_InstanceID];
+
+    // if(second_results[gl_InstanceID] > 0){
+    //     v_color = vec4(0.0f, 1.0f, 0.0f, 1.0f);
+    // }
+    // else if (results[gl_InstanceID] > 0){
+    //     v_color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+    // }
+    // else if(second_results[gl_InstanceID] < 0 || results[gl_InstanceID] < 0){
+    //     v_color = vec4(0.0f, 0.0f, 1.0f, 1.0f);
+    // }
+    // else {
+    //     v_color = colors[gl_InstanceID];
+    // }
+    v_color = colors[gl_InstanceID];
 }
 
 #shader fragment
