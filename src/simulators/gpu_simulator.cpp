@@ -183,11 +183,14 @@ void GpuSimulator::initializeData(){
         sim_spheres[i][1] = (*transform)[3][1];
         sim_spheres[i][2] = (*transform)[3][2];
 
-        sim_properties[i].velocity = glm::linearRand(glm::vec3(-0.05f), glm::vec3(0.05f));
+        // sim_properties[i].velocity = glm::linearRand(glm::vec3(-0.05f), glm::vec3(0.05f));
+        sim_properties[i].velocity = i % 2 == 0 ? glm::vec3(0.0f, 0.0f, 0.0f) : glm::vec3(0.05f, 0.0f, 0.0f);
         sim_properties[i].acceleration = glm::vec3(0.0f);
         sim_properties[i].angular_velocity = glm::linearRand(glm::vec3(-0.05f), glm::vec3(0.05f));
+        // sim_properties[i].angular_velocity = glm::vec3(0.0f);
         sim_properties[i].angular_acceleration = glm::vec3(0.0f);
 
+        // sim_properties[i].inverseMass = i % 2 == 0 ? 0.0f : 1.0f;
         sim_properties[i].inverseMass = 1.0f;
         sim_properties[i].inverseInertiaTensor = inverseTensor;
         sim_properties[i].friction = 0.0f;

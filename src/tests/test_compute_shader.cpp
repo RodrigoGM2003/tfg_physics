@@ -21,12 +21,18 @@ namespace test{
         m_noise_intensity(0.3f) {
 
         //Object distribution grid
-        int grid_x = 37;
-        int grid_y = 37;
-        int grid_z = 37;
+        // int grid_x = 37;
+        // int grid_y = 37;
+        // int grid_z = 37;
+        int grid_x = 11;
+        int grid_y = 11;
+        int grid_z = 1;
         // int grid_x = 100;
         // int grid_y = 100;
         // int grid_z = 100;
+        
+        float spacing = 2.0f;
+
         m_instances = grid_x * grid_y * grid_z;
 
         // Cube vertices
@@ -52,7 +58,6 @@ namespace test{
 
         m_model_matrices = new std::vector<glm::mat4>(m_instances);
         
-        float spacing = 3.0f;
 
         // Calculate center offset
         glm::vec3 center_offset = glm::vec3((grid_x - 1) * 0.5f * spacing, 
