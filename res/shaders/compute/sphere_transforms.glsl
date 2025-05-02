@@ -19,6 +19,7 @@ layout(std430, binding = 7) buffer SphereBuffer {
 };
 
 uniform float delta_time;
+uniform vec3 gravity = vec3(0.0f, -0.098f, 0.0f);
 
 layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
 
@@ -66,6 +67,7 @@ void main() {
     
     // Update position with simple integration
     vec3 position = transform[3].xyz;
+    velocity += prop.inverseMass != 0.0f ? gravity * delta_time : vec3(0.0f);
     vec3 new_position = position + velocity * delta_time;
     
     // Optimized rotation update
@@ -81,6 +83,7 @@ void main() {
         new_rotation = updateRotation(rotation, angular_vel, delta_time);
     }
     
+    properties[gid].velocity.xyz = velocity;
     // Write back transform in one operation
     transforms[gid] = mat4(
         vec4(new_rotation[0], 0.0),

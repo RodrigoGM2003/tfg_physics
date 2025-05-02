@@ -21,19 +21,19 @@ namespace test{
         m_noise_intensity(0.3f) {
 
         //Object distribution grid
-        // int grid_x = 37;
-        // int grid_y = 37;
-        // int grid_z = 37;
-        int grid_x = 11;
-        int grid_y = 11;
-        int grid_z = 1;
+        int grid_x = 5;
+        int grid_y = 30;
+        int grid_z = 5;
+        // int grid_x = 5;
+        // int grid_y = 5;
+        // int grid_z = 5;
         // int grid_x = 100;
         // int grid_y = 100;
         // int grid_z = 100;
         
-        float spacing = 2.0f;
+        float spacing = 3.0f;
 
-        m_instances = grid_x * grid_y * grid_z;
+        m_instances = grid_x * grid_y * grid_z + 1;
 
         // Cube vertices
         m_vertices = std::vector<SimpleVertex>(std::begin(CONSTANTS::CUBE_MESH_SIMPLE_VERTICES), std::end(CONSTANTS::CUBE_MESH_SIMPLE_VERTICES));
@@ -74,6 +74,15 @@ namespace test{
                 }
             }
         }
+
+        glm::mat4 model = glm::mat4(1.0f);
+        glm::vec3 scale = glm::vec3(25.0f);                   // Uniform scale
+        glm::vec3 position = glm::vec3(0.0f, -100.0f, 0.0f);
+        
+        model = glm::translate(model, position);              // Then translate
+        model = glm::scale(model, scale);                     // Scale first
+        
+        m_model_matrices->at(m_instances - 1) = model;
         
         m_cube.setData(m_vertices, m_indices, *m_model_matrices, *m_colors, m_instances);
         m_shader.setShader("tex_gpu_renderer.glsl");

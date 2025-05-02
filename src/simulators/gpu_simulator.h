@@ -29,11 +29,18 @@ private:
     std::vector<glm::vec4> m_object_vertices; 
     std::vector<glm::vec4> m_object_normals; 
     std::vector<glm::vec4> m_object_edges; 
+    // std::vector<unsigned int> m_object_edges; 
 
+    std::vector<float> m_normal_impulses;
+    std::vector<glm::vec3> m_tangent_impulses;
+    std::vector<glm::vec3> m_delta_linear_impulses;
+    std::vector<glm::vec3> m_delta_angular_impulses;
 
     ComputeShader m_transform_shader;
     ComputeShader m_broad_phase_shader;
     ComputeShader m_narrow_phase_shader;
+    ComputeShader m_impulse_phase_shader;
+    ComputeShader m_accumulation_phase_shader;
 
     ShaderStorageBuffer m_transform_ssbo;
     ShaderStorageBuffer m_aabbs_ssbo;
@@ -46,6 +53,12 @@ private:
     ShaderStorageBuffer m_object_vertices_ssbo;
     ShaderStorageBuffer m_object_normals_ssbo;
     ShaderStorageBuffer m_object_edges_ssbo;
+    ShaderStorageBuffer m_contact_manifolds_ssbo;
+
+    ShaderStorageBuffer m_normal_impulses_ssbo;
+    ShaderStorageBuffer m_tangent_impulses_ssbo;
+    ShaderStorageBuffer m_deltaV_ssbo;
+    ShaderStorageBuffer m_delta_angular_impulses_ssbo;
 
     unsigned int m_zero = 0;
 

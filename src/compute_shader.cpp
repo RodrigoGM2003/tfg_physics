@@ -34,6 +34,7 @@ ComputeShader::~ComputeShader() {
 }
 
 void ComputeShader::bind() const {
+    // std::cout<<"ID: "<<m_renderer_id<<std::endl;
     GLCall(glUseProgram(m_renderer_id));
 }
 
@@ -121,10 +122,20 @@ void ComputeShader::setShader(const std::string& filename) {
     m_file_path = __FILE__;
     m_file_path = m_file_path.substr(0, m_file_path.find_last_of("\\/"));
     m_file_path += "/../res/shaders/compute/" + filename;
-    
+
     // Read the shader file and create the shader
     std::string source = this->readComputeShader(m_file_path);
     m_renderer_id = this->createComputeShader(source);
+
+    GLint status;
+    GLCall(glGetProgramiv(m_renderer_id, GL_LINK_STATUS, &status));
+    if (status == GL_FALSE) {
+        GLint logLength;
+        GLCall(glGetProgramiv(m_renderer_id, GL_INFO_LOG_LENGTH, &logLength));
+        std::vector<char> log(logLength);
+        GLCall(glGetProgramInfoLog(m_renderer_id, logLength, nullptr, log.data()));
+        std::cerr << "Shader linking error in " << filename << ": " << log.data() << std::endl;
+    }
 }
 
 // std::string ComputeShader::readComputeShader(const std::string& file) {
@@ -199,21 +210,6 @@ unsigned int ComputeShader::compileComputeShader(const std::string& source) {
 
     // Compile the shader
     GLCall(glCompileShader(id));
-
-    // Check for errors
-    int result;
-    GLCall(glGetShaderiv(id, GL_COMPILE_STATUS, &result));
-    if (!result) {
-        int length;
-        GLCall(glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length));
-
-        char* message = (char*)alloca(length * sizeof(char));
-
-        GLCall(glGetShaderInfoLog(id, length, &length, message));
-
-        std::cerr << "Failed to compile compute shader" << std::endl;
-        std::cerr << message << std::endl;
-    }
 
     return id;
 }

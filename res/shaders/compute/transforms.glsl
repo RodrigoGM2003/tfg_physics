@@ -19,6 +19,7 @@ layout(std430, binding = 4) buffer ResultsBuffer {
 };
 
 uniform float delta_time;
+uniform vec3 gravity = vec3(0.0f, -1.0f, 0.0f);
 
 layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
 
@@ -65,7 +66,14 @@ void main() {
     vec3 angular_vel = prop.angular_velocity.xyz;
     
     // Update position with simple integration
+    // Update position with simple integration
     vec3 position = transform[3].xyz;
+
+    // if (prop.inverseMass != 0.0f) {
+    //     velocity += gravity * delta_time;
+    // }
+    velocity += prop.inverseMass != 0.0f ? gravity * delta_time : vec3(0.0f);
+
     vec3 new_position = position + velocity * delta_time;
     
     // Optimized rotation update
@@ -88,6 +96,7 @@ void main() {
         vec4(new_rotation[2], 0.0),
         vec4(new_position, 1.0)
     );
+    properties[gid].velocity.xyz = velocity;
 
         // Update AABB with rotation-invariant approach
     vec3 extents = aabbs[gid].extents.xyz;

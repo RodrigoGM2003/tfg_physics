@@ -38,6 +38,20 @@ namespace physics{
     };
 
     /**
+     * @brief Physics properties of an object
+     */
+    struct ContactManifold{
+        alignas(16) unsigned int indexA;
+        alignas(16) unsigned int indexB;
+        alignas(16) glm::vec4 normal;          // World space, consistent direction (e.g., A->B)
+        alignas(16) float depth;          // Penetration depth
+        alignas(16) glm::vec4 pointWorld;      // Contact point in world space
+        // alignas(16) unsigned int type;         // Optional: Store collision type (FaceA, FaceB, EdgeEdge)
+        // alignas(16) unsigned int featureA;     // Optional: Store feature index on A
+        // alignas(16) unsigned int featureB;     // Optional: Store feature index on B
+    };
+
+    /**
      * @brief Representation of an object
      */
     struct Object{
