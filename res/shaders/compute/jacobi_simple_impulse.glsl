@@ -25,7 +25,7 @@ layout(std430, binding = 26) buffer ContactManifoldBuffer {
 };
 
 layout(std430, binding = 29) buffer DeltaVBuffer {
-    vec3 deltaVs[];
+    vec4 deltaVs[];
 };
 
 layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
@@ -81,4 +81,11 @@ void main(){
         // properties[contact.indexA].velocity = vec4(v1, 0.0);
         // properties[contact.indexB].velocity = vec4(v2, 0.0);
     }
+
+    ContactManifold blankContact;
+    blankContact.indexA = 0;
+    blankContact.indexB = 0;
+    blankContact.normal = vec4(0.0f);
+    blankContact.depth = 0.0f;
+    manifolds[gid] = blankContact;
 }

@@ -21,17 +21,17 @@ namespace test{
         m_noise_intensity(0.3f) {
 
         //Object distribution grid
-        int grid_x = 5;
-        int grid_y = 30;
-        int grid_z = 5;
         // int grid_x = 5;
-        // int grid_y = 5;
+        // int grid_y = 15;
         // int grid_z = 5;
+        int grid_x = 32;
+        int grid_y = 32;
+        int grid_z = 32;
         // int grid_x = 100;
         // int grid_y = 100;
         // int grid_z = 100;
         
-        float spacing = 3.0f;
+        float spacing = 4.0f;
 
         m_instances = grid_x * grid_y * grid_z + 1;
 
@@ -59,16 +59,17 @@ namespace test{
         m_model_matrices = new std::vector<glm::mat4>(m_instances);
         
 
-        // Calculate center offset
         glm::vec3 center_offset = glm::vec3((grid_x - 1) * 0.5f * spacing, 
-                                            (grid_y - 1) * 0.5f * spacing, 
-                                            -(grid_z - 1) * 0.5f * spacing);
+                                    (grid_y - 1) * 0.5f * spacing, 
+                                    -(grid_z - 1) * 0.5f * spacing);
+
+        glm::vec3 global_offset = glm::vec3(0.0f, 0.0f, 0.0f);  // Shift whole grid +5 in x
 
         for (int x = 0; x < grid_x; x++) {
             for (int y = 0; y < grid_y; y++) {
                 for (int z = 0; z < grid_z; z++) {
                     glm::mat4 model = glm::mat4(1.0f);
-                    glm::vec3 position = glm::vec3(x * spacing, y * spacing, -z * spacing) - center_offset;
+                    glm::vec3 position = glm::vec3(x * spacing, y * spacing, -z * spacing) - center_offset + global_offset;
                     model = glm::translate(model, position);
                     m_model_matrices->at(x * grid_y * grid_z + y * grid_z + z) = model;
                 }
@@ -77,7 +78,7 @@ namespace test{
 
         glm::mat4 model = glm::mat4(1.0f);
         glm::vec3 scale = glm::vec3(25.0f);                   // Uniform scale
-        glm::vec3 position = glm::vec3(0.0f, -100.0f, 0.0f);
+        glm::vec3 position = glm::vec3(0.0f, -400.0f, 0.0f);
         
         model = glm::translate(model, position);              // Then translate
         model = glm::scale(model, scale);                     // Scale first

@@ -18,6 +18,10 @@ layout(std430, binding = 7) buffer SphereBuffer {
     vec4 spheres[];
 };
 
+layout(std430, binding = 29) buffer DeltaVBuffer {
+    vec4 deltaVs[];
+};
+
 uniform float delta_time;
 uniform vec3 gravity = vec3(0.0f, -0.098f, 0.0f);
 
@@ -67,7 +71,7 @@ void main() {
     
     // Update position with simple integration
     vec3 position = transform[3].xyz;
-    velocity += prop.inverseMass != 0.0f ? gravity * delta_time : vec3(0.0f);
+    // velocity += prop.inverseMass != 0.0f ? gravity * delta_time : vec3(0.0f);
     vec3 new_position = position + velocity * delta_time;
     
     // Optimized rotation update
@@ -93,4 +97,6 @@ void main() {
     );
 
     spheres[gid].xyz = new_position;
+
+    deltaVs[gid] = vec4(0.0f);
 }

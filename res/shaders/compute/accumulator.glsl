@@ -8,7 +8,7 @@ layout(std430, binding = 5) buffer PropertiesBuffer {
 };
 
 layout(std430, binding = 29) buffer DeltaVBuffer {
-    vec3 deltaVs[];
+    vec4 deltaVs[];
 };
 
 
@@ -23,9 +23,9 @@ void main(){
 
 
     if(properties[gid].inverseMass > 0.0){
-        properties[gid].velocity.xyz += deltaVs[gid];
+        properties[gid].velocity += deltaVs[gid];
     }
 
     // Reset accumulators for next iteration
-    deltaVs[gid] = vec3(0.0);
+    deltaVs[gid] = vec4(0.0);
 }
