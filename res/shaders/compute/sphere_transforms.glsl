@@ -71,7 +71,7 @@ void main() {
     
     // Update position with simple integration
     vec3 position = transform[3].xyz;
-    // velocity += prop.inverseMass != 0.0f ? gravity * delta_time : vec3(0.0f);
+    velocity += prop.inverseMass != 0.0f ? gravity * delta_time : vec3(0.0f);
     vec3 new_position = position + velocity * delta_time;
     
     // Optimized rotation update

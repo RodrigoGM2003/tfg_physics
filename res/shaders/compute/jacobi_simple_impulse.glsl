@@ -55,7 +55,7 @@ void main(){
 
     // Only apply impulse if objects are moving towards each other
     if (relVelAlongNormal < 0.0) {
-        float restitution = 0.9; // Coefficient of restitution (bounciness)
+        float restitution = 0.0; // Coefficient of restitution (bounciness)
 
         // Calculate impulse scalar using the formula:
         // j = -(1 + restitution) * (v_rel · n) / (invMass1 + invMass2)
