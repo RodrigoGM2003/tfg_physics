@@ -60,7 +60,7 @@ GpuSimulator::GpuSimulator(
     m_spheres_ssbo.setBuffer(sim_spheres.data(), sim_spheres.size() * sizeof(glm::vec4), GL_DYNAMIC_DRAW);
     m_spheres_ssbo.unbind();
 
-    m_collision_pair_ssbo.setBuffer(nullptr, sim_spheres.size() * sizeof(glm::ivec2) * 10, GL_DYNAMIC_DRAW);
+    m_collision_pair_ssbo.setBuffer(nullptr, sim_spheres.size() * sizeof(glm::ivec2) * sim_spheres.size(), GL_DYNAMIC_DRAW);
     m_collision_pair_ssbo.unbind();
 
     m_collision_count_ssbo.setBuffer(nullptr, sizeof(unsigned int), GL_DYNAMIC_DRAW);
@@ -117,8 +117,8 @@ GpuSimulator::GpuSimulator(
     // m_object_edges_ssbo.setBuffer(m_object_edges.data(), m_object_edges.size() * sizeof(unsigned int), GL_STATIC_DRAW);
     m_object_edges_ssbo.unbind();
 
-    std::vector<physics::ContactManifold> manifolds(sim_spheres.size() * 10, physics::ContactManifold());
-    m_contact_manifolds_ssbo.setBuffer(manifolds.data(), sim_spheres.size() * sizeof(physics::ContactManifold) * 10, GL_DYNAMIC_DRAW);
+    std::vector<physics::ContactManifold> manifolds(sim_spheres.size() * sim_spheres.size(), physics::ContactManifold());
+    m_contact_manifolds_ssbo.setBuffer(manifolds.data(), sim_spheres.size() * sizeof(physics::ContactManifold) * sim_spheres.size(), GL_DYNAMIC_DRAW);
     m_contact_manifolds_ssbo.unbind();
     
     // //---------------------------------
@@ -194,7 +194,7 @@ void GpuSimulator::update(float delta_time){
     unsigned int collision_counter = *(unsigned int *)m_collision_count_ssbo.readData();
     m_collision_count_ssbo.unmapBuffer();
     
-    
+    std::cout<<"Max count: "<<sim_spheres.size() * sim_spheres.size() <<" actual count: "<<collision_counter<<std::endl;
     // Narrow phase and resolution
     if(collision_counter > 0){
         work_groups = (collision_counter + 256 - 1) / 256;
@@ -208,7 +208,7 @@ void GpuSimulator::update(float delta_time){
         m_collision_count_ssbo.unmapBuffer();
 
 
-        for(int i = 0; i < 1 && collision_counter > 0; i++){
+        for(int i = 0; i < 10 && collision_counter > 0; i++){
 
             
             // std::cout<<std::endl;

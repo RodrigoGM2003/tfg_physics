@@ -191,6 +191,6 @@ void main() {
     }
 
     // Mark both objects in the collision pair (for visualization or debugging)
-    // secondResults[o1.idx] = collision.colliding ? -1 : 1;
-    // results[o2.idx] = collision.colliding ? -1 : 1;
+    secondResults[o1.idx] = collision.colliding ? -1 : 1;
+    results[o2.idx] = collision.colliding ? -1 : 1;
 }

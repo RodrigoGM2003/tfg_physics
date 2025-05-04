@@ -21,9 +21,9 @@ namespace test{
         m_noise_intensity(0.0f) {
 
         //Object distribution grid
-        int grid_x = 3;
-        int grid_y = 30;
-        int grid_z = 3;
+        int grid_x = 45;
+        int grid_y = 10;
+        int grid_z = 10;
         // int grid_x = 32;
         // int grid_y = 32;
         // int grid_z = 32;
@@ -49,12 +49,12 @@ namespace test{
         static std::mt19937 gen(42);
         std::uniform_real_distribution<float> dist(0.0f, 1.0f);
 
-        for (int i = 0; i < m_instances; i++) {
-            m_colors->at(i) = glm::vec4(dist(gen), dist(gen), dist(gen), 1.0f);
-        }
         // for (int i = 0; i < m_instances; i++) {
-        //     m_colors->at(i) = glm::vec4(0.2f,0.2f,0.2f, 1.0f);
-        // }   
+        //     m_colors->at(i) = glm::vec4(dist(gen), dist(gen), dist(gen), 1.0f);
+        // }
+        for (int i = 0; i < m_instances; i++) {
+            m_colors->at(i) = glm::vec4(0.2f,0.2f,0.2f, 1.0f);
+        }   
 
         m_model_matrices = new std::vector<glm::mat4>(m_instances);
         
@@ -78,7 +78,7 @@ namespace test{
 
         glm::mat4 model = glm::mat4(1.0f);
         glm::vec3 scale = glm::vec3(5.0f);                   // Uniform scale
-        glm::vec3 position = glm::vec3(-50.0f, 0.0f, 0.0f);
+        glm::vec3 position = glm::vec3(-50.0f, -50.0f, 0.0f);
         
         model = glm::translate(model, position);              // Then translate
         model = glm::scale(model, scale);                     // Scale first
@@ -86,7 +86,7 @@ namespace test{
         m_model_matrices->at(m_instances - 2) = model;
 
         model = glm::mat4(1.0f);
-        scale = glm::vec3(25.0f);                   // Uniform scale
+        scale = glm::vec3(50.0f);                   // Uniform scale
         position = glm::vec3(0.0f, -40.0f, 0.0f);
         
         model = glm::translate(model, position);              // Then translate
