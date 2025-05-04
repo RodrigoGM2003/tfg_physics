@@ -40,7 +40,7 @@ namespace test{
         Shader m_shader;
         Shader m_light_shader;
 
-        float m_time_factor = 0.0f;
+        float m_time_factor = 1.0f;
 
         std::vector<SimpleVertex> m_vertices;
         std::vector<unsigned int> m_indices;

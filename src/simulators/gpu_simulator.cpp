@@ -154,7 +154,7 @@ GpuSimulator::GpuSimulator(
     m_normal_impulses_ssbo.bindToBindingPoint(27);
     m_tangent_impulses_ssbo.bindToBindingPoint(28);
     m_deltaV_ssbo.bindToBindingPoint(29);
-    m_delta_angular_impulses_ssbo.bindToBindingPoint(10);
+    // m_delta_angular_impulses_ssbo.bindToBindingPoint(10);
 }
 
 GpuSimulator::~GpuSimulator(){
@@ -208,7 +208,7 @@ void GpuSimulator::update(float delta_time){
         m_collision_count_ssbo.unmapBuffer();
 
 
-        for(int i = 0; i < 10 && collision_counter > 0; i++){
+        for(int i = 0; i < 1 && collision_counter > 0; i++){
 
             
             // std::cout<<std::endl;
@@ -357,6 +357,7 @@ void GpuSimulator::initializeData(){
 
     sim_properties[sim_transforms->size() - 2].velocity = glm::vec3(3.0f, 0.0f, 0.0f);
     sim_properties[sim_transforms->size() - 2].angular_velocity= glm::linearRand(glm::vec3(-0.05f), glm::vec3(0.05f));
+    // sim_properties[sim_transforms->size() - 2].angular_velocity= glm::vec3(0.0f, 0.0f, 0.0f);
     sim_properties[sim_transforms->size() - 2].inverseMass = 1.0f/125.0f;
     sim_properties[sim_transforms->size() - 2].inverseInertiaTensor = inverseTensor;
     sim_properties[sim_transforms->size() - 2].friction = 0.0f;

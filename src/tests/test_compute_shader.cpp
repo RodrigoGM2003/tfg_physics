@@ -18,11 +18,11 @@ namespace test{
 
     TestComputeShader::TestComputeShader()
         : m_camera(m_width, m_height, glm::vec3(0.0f, 0.0f, 100.0f)),
-        m_noise_intensity(0.3f) {
+        m_noise_intensity(0.0f) {
 
         //Object distribution grid
         int grid_x = 3;
-        int grid_y = 50;
+        int grid_y = 30;
         int grid_z = 3;
         // int grid_x = 32;
         // int grid_y = 32;
@@ -87,7 +87,7 @@ namespace test{
 
         model = glm::mat4(1.0f);
         scale = glm::vec3(25.0f);                   // Uniform scale
-        position = glm::vec3(0.0f, -50.0f, 0.0f);
+        position = glm::vec3(0.0f, -40.0f, 0.0f);
         
         model = glm::translate(model, position);              // Then translate
         model = glm::scale(model, scale);                     // Scale first

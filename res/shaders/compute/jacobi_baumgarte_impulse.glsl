@@ -77,7 +77,7 @@ void main() {
     // --- Resolve Collision and Penetration ---
     // We apply resolution if objects are moving towards each other (negative relative velocity along normal)
     // OR if they are penetrating more than the allowed slop (to push them apart even if moving slowly apart)
-    if (relVelAlongNormal < 0.0 || depth > BaumgarteSlop) {
+    if ((relVelAlongNormal < 0.0 && depth > BaumgarteSlop) || depth > BaumgarteSlop) {
 
         // Calculate the sum of inverse masses (used in impulse calculation)
         float invMassSum = invMass1 + invMass2;

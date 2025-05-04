@@ -41,6 +41,7 @@ void main(){
     // Get positions from transforms (assuming column 3 contains translation)
     // Use the normalized vector from o1 to o2 as an approximation of the collision normal
     vec3 collisionNormal = contact.normal.xyz;
+    float depth = contact.depth;
     // vec3 collisionNormal = normalize(pos2 - pos1);
 
     // Retrieve velocities and inverse masses from the properties buffer
@@ -54,8 +55,8 @@ void main(){
     float relVelAlongNormal = dot(relVel, collisionNormal);
 
     // Only apply impulse if objects are moving towards each other
-    if (relVelAlongNormal < 0.0) {
-        float restitution = 0.0; // Coefficient of restitution (bounciness)
+    if (relVelAlongNormal < 0.0 && depth > 0.01) {
+        float restitution = 0.5; // Coefficient of restitution (bounciness)
 
         // Calculate impulse scalar using the formula:
         // j = -(1 + restitution) * (v_rel · n) / (invMass1 + invMass2)
@@ -82,10 +83,10 @@ void main(){
         // properties[contact.indexB].velocity = vec4(v2, 0.0);
     }
 
-    ContactManifold blankContact;
-    blankContact.indexA = 0;
-    blankContact.indexB = 0;
-    blankContact.normal = vec4(0.0f);
-    blankContact.depth = 0.0f;
-    manifolds[gid] = blankContact;
+    // ContactManifold blankContact;
+    // blankContact.indexA = 0;
+    // blankContact.indexB = 0;
+    // blankContact.normal = vec4(0.0f);
+    // blankContact.depth = 0.0f;
+    // manifolds[gid] = blankContact;
 }
