@@ -22,8 +22,13 @@ layout(std430, binding = 29) buffer DeltaVBuffer {
     vec4 deltaVs[];
 };
 
+layout(std430, binding = 30) buffer DeltaWBuffer {
+    vec4 deltaWs[];
+};
+
 uniform float delta_time;
 uniform vec3 gravity = vec3(0.0f, -0.098f, 0.0f);
+// uniform vec3 gravity = vec3(0.0f, 0.0f, 0.0f);
 
 layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
 
@@ -99,4 +104,5 @@ void main() {
     spheres[gid].xyz = new_position;
 
     deltaVs[gid] = vec4(0.0f);
+    deltaWs[gid] = vec4(0.0f);
 }

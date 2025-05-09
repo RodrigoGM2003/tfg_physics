@@ -58,7 +58,7 @@ private:
     ShaderStorageBuffer m_normal_impulses_ssbo;
     ShaderStorageBuffer m_tangent_impulses_ssbo;
     ShaderStorageBuffer m_deltaV_ssbo;
-    ShaderStorageBuffer m_delta_angular_impulses_ssbo;
+    ShaderStorageBuffer m_deltaW_ssbo;
 
     unsigned int m_zero = 0;
 

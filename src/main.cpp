@@ -33,6 +33,7 @@
 #include "tests/test_multiple.h"
 #include "tests/test_lights.h"
 #include "tests/test_compute_shader.h"
+#include "tests/test_rotation.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
@@ -226,6 +227,7 @@ void mainLoop() {
     test_menu->registerTest<test::TestMultiple>("Multiple");
     test_menu->registerTest<test::TestLights>("Lights");
     test_menu->registerTest<test::TestComputeShader>("ComputeShader");
+    test_menu->registerTest<test::TestRotation>("Rotation");
 
     // Variables to handle key press state
     bool r_key_pressed = false;
@@ -238,7 +240,10 @@ void mainLoop() {
 
     std::thread saverThread(frameSaver);
 
-
+    GLint maxSSBOSize = 0;
+    glGetIntegerv(GL_MAX_SHADER_STORAGE_BLOCK_SIZE, &maxSSBOSize);
+    printf("Max SSBO size: %d bytes\n", maxSSBOSize);
+    
     while (!terminate_program) {
         // Calculate frame start time
         double frame_start_time = glfwGetTime();
