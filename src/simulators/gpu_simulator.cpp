@@ -9,15 +9,24 @@
 #include "glm/gtc/quaternion.hpp"
 #include "glm/gtc/random.hpp" 
 #include "glm/gtx/component_wise.hpp"
+#include "../constants.h"
+#include "../utils.h"
 
 
 GpuSimulator::GpuSimulator(
     std::vector<glm::mat4>* transforms, 
     const std::vector<SimpleVertex>* static_vertices, 
-    const std::vector<unsigned int>* static_indices
+    const std::vector<unsigned int>* static_indices,
+    const std::vector<glm::vec4>* object_vertices,
+    const std::vector<glm::vec4>* object_normals, 
+    const std::vector<glm::vec4>* object_edges
 ) : sim_transforms(transforms), 
     sim_static_vertices(static_vertices), 
-    sim_static_indices(static_indices){
+    sim_static_indices(static_indices),
+    m_object_vertices(object_vertices),
+    m_object_normals(object_normals),
+    m_object_edges(object_edges)
+    {
 
     initializeData();
 
@@ -33,16 +42,19 @@ GpuSimulator::GpuSimulator(
     m_broad_phase_shader.bind();
 
     //Narrow phase shader
-    m_narrow_phase_shader.setShader("narrow_rotation.glsl");
+    m_narrow_phase_shader.setShader("narrow_working.glsl");
+    // m_narrow_phase_shader.setShader("narrow_rotation.glsl");
     m_narrow_phase_shader.useTimer(false);
     m_narrow_phase_shader.bind();
     
     //Resolution phase shaders
-    m_impulse_phase_shader.setShader("jacobi_rotation_impulse.glsl");
+    m_impulse_phase_shader.setShader("jacobi_friction_impulse.glsl");
+    // m_impulse_phase_shader.setShader("jacobi_rotation_impulse.glsl");
     m_impulse_phase_shader.useTimer(false);
     m_impulse_phase_shader.bind();
     
-    m_accumulation_phase_shader.setShader("accumulator_rotation.glsl");
+    m_accumulation_phase_shader.setShader("accumulator.glsl");
+    // m_accumulation_phase_shader.setShader("accumulator_rotation.glsl");
     m_accumulation_phase_shader.useTimer(false);
     m_accumulation_phase_shader.bind();
 
@@ -69,51 +81,50 @@ GpuSimulator::GpuSimulator(
     m_second_results_ssbo.setBuffer(nullptr, sim_transforms->size() * sizeof(int), GL_DYNAMIC_DRAW);
     m_second_results_ssbo.unbind();
 
-    m_object_vertices = {
-        {-0.5f, -0.5f, -0.5f, 1.0f},   
-        { 0.5f, -0.5f, -0.5f, 1.0f},   
-        { 0.5f, -0.5f,  0.5f, 1.0f},   
-        {-0.5f, -0.5f,  0.5f, 1.0f},   
+    // m_object_vertices = {
+    //     {-0.5f, -0.5f, -0.5f, 1.0f},   
+    //     { 0.5f, -0.5f, -0.5f, 1.0f},   
+    //     { 0.5f, -0.5f,  0.5f, 1.0f},   
+    //     {-0.5f, -0.5f,  0.5f, 1.0f},   
 
-        {-0.5f,  0.5f, -0.5f, 1.0f},   
-        { 0.5f,  0.5f, -0.5f, 1.0f},   
-        { 0.5f,  0.5f,  0.5f, 1.0f},   
-        {-0.5f,  0.5f,  0.5f, 1.0f}   
-    };
-
-    m_object_normals = {
-        {1.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 1.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 1.0f, 0.0f}
-    };
-
-    m_object_edges = {
-        {1.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 1.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 1.0f, 0.0f},
-    };
-    // m_object_edges = {
-    //     0, 1,
-    //     0, 3,
-    //     0, 4,
-    //     6, 7,
-    //     6, 5,
-    //     6, 2,
-    //     5, 1,
-    //     4, 5,
-    //     4, 7,
-    //     7, 3,
-    //     2, 3,
-    //     2, 1
+    //     {-0.5f,  0.5f, -0.5f, 1.0f},   
+    //     { 0.5f,  0.5f, -0.5f, 1.0f},   
+    //     { 0.5f,  0.5f,  0.5f, 1.0f},   
+    //     {-0.5f,  0.5f,  0.5f, 1.0f}   
     // };
 
-    m_object_vertices_ssbo.setBuffer(m_object_vertices.data(), m_object_vertices.size() * sizeof(glm::vec4), GL_STATIC_DRAW);
+    // m_object_normals = {
+    //     {1.0f, 0.0f, 0.0f, 0.0f},
+    //     {0.0f, 1.0f, 0.0f, 0.0f},
+    //     {0.0f, 0.0f, 1.0f, 0.0f}
+    // };
+
+    // m_object_edges = {
+    //     {1.0f, 0.0f, 0.0f, 0.0f},
+    //     {0.0f, 1.0f, 0.0f, 0.0f},
+    //     {0.0f, 0.0f, 1.0f, 0.0f},
+    // };
+
+    // m_object_vertices = utils::extractPositions(CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES, std::size(CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES));
+    // m_object_normals = utils::extractNormals  (CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES, std::size(CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES));
+    // m_object_edges = utils::extractEdges    (CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES,
+    //                             CONSTANTS::DODECAHEDRON_MESH_INDICES,
+    //                             std::size(CONSTANTS::DODECAHEDRON_MESH_INDICES));
+
+
+    // for(auto a : m_object_normals){
+    //     std::cout<<a.x<<"   "<<a.y<<"   "<<a.z<<"   "<<a.w<<"   ";
+    //     std::cout<<std::endl;
+    // }
+
+
+    m_object_vertices_ssbo.setBuffer(m_object_vertices->data(), m_object_vertices->size() * sizeof(glm::vec4), GL_STATIC_DRAW);
     m_object_vertices_ssbo.unbind();
 
-    m_object_normals_ssbo.setBuffer(m_object_normals.data(), m_object_normals.size() * sizeof(glm::vec4), GL_STATIC_DRAW);
+    m_object_normals_ssbo.setBuffer(m_object_normals->data(), m_object_normals->size() * sizeof(glm::vec4), GL_STATIC_DRAW);
     m_object_normals_ssbo.unbind();
 
-    m_object_edges_ssbo.setBuffer(m_object_edges.data(), m_object_edges.size() * sizeof(glm::vec4), GL_STATIC_DRAW);
+    m_object_edges_ssbo.setBuffer(m_object_edges->data(), m_object_edges->size() * sizeof(glm::vec4), GL_STATIC_DRAW);
     // m_object_edges_ssbo.setBuffer(m_object_edges.data(), m_object_edges.size() * sizeof(unsigned int), GL_STATIC_DRAW);
     m_object_edges_ssbo.unbind();
 
@@ -212,32 +223,33 @@ void GpuSimulator::update(float delta_time){
         m_collision_count_ssbo.unmapBuffer();
         
 
-        for(int i = 0; i < 1 && collision_counter > 0; i++){
+        for(int i = 0; i < 10 && collision_counter > 0; i++){
 
-            // ------------------------------------------------------------------//
-            std::cout<<std::endl;
-            std::cout<<"--------------------------------------------------------------------"<<std::endl;
-            std::cout<<"MANIFOLDS: ";
-            m_contact_manifolds_ssbo.bind();
-            physics::ContactManifold* obj3 = (physics::ContactManifold *)m_contact_manifolds_ssbo.readData();
-            for(int i = 0; i < collision_counter; i++){
-                glm::vec3 normal = obj3[i].normal;
-                glm::vec3 contactPointA = obj3[i].rAWorld;
-                glm::vec3 contactPointB = obj3[i].rBWorld;
-                unsigned int indexA = obj3[i].indexA;
-                unsigned int indexB = obj3[i].indexB;
-                float depth = obj3[i].depth;
-                std::cout<<"Objects "<<indexA<< " and "<< indexB <<std::endl;
-                std::cout<<"Normal: "<<normal.x<<" "<<normal.y<<" "<<normal.z<<" | "<<std::endl;;
-                std::cout<<"Depth: "<<depth<<" | "<<std::endl;;
-                std::cout<<"Contact Point "<<indexA<<": "<<contactPointA.x<<" "<<contactPointA.y<<" "<<contactPointA.z<<" | "<<std::endl;;
-                std::cout<<"Contact Point "<<indexB<<": "<<contactPointB.x<<" "<<contactPointB.y<<" "<<contactPointB.z<<" | ";
+            // // ------------------------------------------------------------------//
+            // std::cout<<std::endl;
+            // std::cout<<"--------------------------------------------------------------------"<<std::endl;
+            // std::cout<<"MANIFOLDS: ";
+            // m_contact_manifolds_ssbo.bind();
+            // physics::ContactManifold* obj3 = (physics::ContactManifold *)m_contact_manifolds_ssbo.readData();
+            // for(int i = 0; i < collision_counter; i++){
+            //     glm::vec3 normal = obj3[i].normal;
+            //     glm::vec3 contactPointA = obj3[i].rAWorld;
+            //     glm::vec3 contactPointB = obj3[i].rBWorld;
+            //     unsigned int indexA = obj3[i].indexA;
+            //     unsigned int indexB = obj3[i].indexB;
+            //     float depth = obj3[i].depth;
+            //     std::cout<<"Objects "<<indexA<< " and "<< indexB <<std::endl;
+            //     std::cout<<"Normal: "<<normal.x<<" "<<normal.y<<" "<<normal.z<<" | "<<std::endl;;
+            //     std::cout<<"Depth: "<<depth<<" | "<<std::endl;;
+            //     std::cout<<"Contact Point "<<indexA<<": "<<contactPointA.x<<" "<<contactPointA.y<<" "<<contactPointA.z<<" | "<<std::endl;;
+            //     std::cout<<"Contact Point "<<indexB<<": "<<contactPointB.x<<" "<<contactPointB.y<<" "<<contactPointB.z<<" | ";
 
-                std::cout<<std::endl;
-            }
-            m_contact_manifolds_ssbo.unmapBuffer();
-            glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT);
-            // ------------------------------------------------------------------//
+            //     std::cout<<std::endl;
+            // }
+            // std::cout<<"delta_time: "<<delta_time<<std::endl;
+            // m_contact_manifolds_ssbo.unmapBuffer();
+            // glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT);
+            // // ------------------------------------------------------------------//
 
 
             work_groups = (collision_counter + 256 - 1) / 256;
@@ -247,42 +259,42 @@ void GpuSimulator::update(float delta_time){
             
             glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT); // Essential for SSBO read-after-write
             
-            // ------------------------------------------------------------------//
-            std::cout<<"VELOCITIES: "<<std::endl;
-            m_properties_ssbo.bind();
-            physics::Properties* obj2 = (physics::Properties *)m_properties_ssbo.readData();
-            for(int i = 0; i < sim_spheres.size(); i++){
-                glm::vec3 velocity = obj2[i].velocity;
-                glm::vec3 ang = obj2[i].angular_velocity;
-                float invMass =  obj2[i].inverseMass;
-                std::cout<<"Object velocity "<<i <<": "<<velocity.x<<" "<<velocity.y<<" "<<velocity.z
-                <<" angualr: "<<ang.x<<" "<<ang.y<<" "<<ang.z<<" InvMass :" <<invMass<<" | "<<std::endl;
-            }
-            m_properties_ssbo.unmapBuffer();
-            glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT);
-            std::cout<<std::endl;
+            // // ------------------------------------------------------------------//
+            // std::cout<<"VELOCITIES: "<<std::endl;
+            // m_properties_ssbo.bind();
+            // physics::Properties* obj2 = (physics::Properties *)m_properties_ssbo.readData();
+            // for(int i = 0; i < sim_spheres.size(); i++){
+            //     glm::vec3 velocity = obj2[i].velocity;
+            //     glm::vec3 ang = obj2[i].angular_velocity;
+            //     float invMass =  obj2[i].inverseMass;
+            //     std::cout<<"Object velocity "<<i <<": "<<velocity.x<<" "<<velocity.y<<" "<<velocity.z
+            //     <<" angualr: "<<ang.x<<" "<<ang.y<<" "<<ang.z<<" InvMass :" <<invMass<<" | "<<std::endl;
+            // }
+            // m_properties_ssbo.unmapBuffer();
+            // glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT);
+            // std::cout<<std::endl;
 
-            m_deltaV_ssbo.bind();
-            glm::vec4 * obj = (glm::vec4 *)m_deltaV_ssbo.readData();
-            for(int i = 0; i < sim_spheres.size(); i++){
-                glm::vec4 velocity = obj[i];
-                std::cout<<"Object Linear Impulse "<<i <<": "<<velocity.x<<" "<<velocity.y<<" "<<velocity.z<<" | ";
-            }
-            m_deltaV_ssbo.unmapBuffer();
-            glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT);
-            std::cout<<std::endl;
+            // m_deltaV_ssbo.bind();
+            // glm::vec4 * obj = (glm::vec4 *)m_deltaV_ssbo.readData();
+            // for(int i = 0; i < sim_spheres.size(); i++){
+            //     glm::vec4 velocity = obj[i];
+            //     std::cout<<"Object Linear Impulse "<<i <<": "<<velocity.x<<" "<<velocity.y<<" "<<velocity.z<<" | ";
+            // }
+            // m_deltaV_ssbo.unmapBuffer();
+            // glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT);
+            // std::cout<<std::endl;
 
-            m_deltaW_ssbo.bind();
-            obj = (glm::vec4 *)m_deltaW_ssbo.readData();
-            for(int i = 0; i < sim_spheres.size(); i++){
-                glm::vec4 ang = obj[i];
-                std::cout<<"Object Angular Impulse "<<i <<": "<<ang.x<<" "<<ang.y<<" "<<ang.z<<" | ";
-            }
-            m_deltaW_ssbo.unmapBuffer();
-            glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT);
-            std::cout<<std::endl;
-            std::cout<<std::endl;
-            // ------------------------------------------------------------------//
+            // m_deltaW_ssbo.bind();
+            // obj = (glm::vec4 *)m_deltaW_ssbo.readData();
+            // for(int i = 0; i < sim_spheres.size(); i++){
+            //     glm::vec4 ang = obj[i];
+            //     std::cout<<"Object Angular Impulse "<<i <<": "<<ang.x<<" "<<ang.y<<" "<<ang.z<<" | ";
+            // }
+            // m_deltaW_ssbo.unmapBuffer();
+            // glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT);
+            // std::cout<<std::endl;
+            // std::cout<<std::endl;
+            // // ------------------------------------------------------------------//
 
             
             work_groups = (sim_transforms->size() + 256 - 1) / 256;
@@ -292,44 +304,43 @@ void GpuSimulator::update(float delta_time){
 
             glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT);
 
-            //------------------------------------------------------------------//
+            // //------------------------------------------------------------------//
 
-            m_deltaV_ssbo.bind();
-            obj = (glm::vec4 *)m_deltaV_ssbo.readData();
-            for(int i = 0; i < sim_spheres.size(); i++){
-                glm::vec4 velocity = obj[i];
-                std::cout<<"Object Linear Impulse "<<i <<": "<<velocity.x<<" "<<velocity.y<<" "<<velocity.z<<" | ";
-            }
-            m_deltaV_ssbo.unmapBuffer();
-            glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT);
-            std::cout<<std::endl;
+            // m_deltaV_ssbo.bind();
+            // obj = (glm::vec4 *)m_deltaV_ssbo.readData();
+            // for(int i = 0; i < sim_spheres.size(); i++){
+            //     glm::vec4 velocity = obj[i];
+            //     std::cout<<"Object Linear Impulse "<<i <<": "<<velocity.x<<" "<<velocity.y<<" "<<velocity.z<<" | ";
+            // }
+            // m_deltaV_ssbo.unmapBuffer();
+            // glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT);
+            // std::cout<<std::endl;
             
-            m_deltaW_ssbo.bind();
-            obj = (glm::vec4 *)m_deltaW_ssbo.readData();
-            for(int i = 0; i < sim_spheres.size(); i++){
-                glm::vec4 ang = obj[i];
-                std::cout<<"Object Angular Impulse "<<i <<": "<<ang.x<<" "<<ang.y<<" "<<ang.z<<" | ";
-            }
-            m_deltaW_ssbo.unmapBuffer();
-            glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT);
-            std::cout<<std::endl;
-            // ------------------------------------------------------------------//
+            // m_deltaW_ssbo.bind();
+            // obj = (glm::vec4 *)m_deltaW_ssbo.readData();
+            // for(int i = 0; i < sim_spheres.size(); i++){
+            //     glm::vec4 ang = obj[i];
+            //     std::cout<<"Object Angular Impulse "<<i <<": "<<ang.x<<" "<<ang.y<<" "<<ang.z<<" | ";
+            // }
+            // m_deltaW_ssbo.unmapBuffer();
+            // glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT);
+            // std::cout<<std::endl;
 
-            std::cout<<"VELOCITIES: "<<std::endl;
-            m_properties_ssbo.bind();
-            obj2 = (physics::Properties *)m_properties_ssbo.readData();
-            for(int i = 0; i < sim_spheres.size(); i++){
-                glm::vec3 velocity = obj2[i].velocity;
-                glm::vec3 ang = obj2[i].angular_velocity;
-                float invMass =  obj2[i].inverseMass;
-                std::cout<<"Object velocity "<<i <<": "<<velocity.x<<" "<<velocity.y<<" "<<velocity.z
-                <<" angualr: "<<ang.x<<" "<<ang.y<<" "<<ang.z<<" InvMass :" <<invMass<<" | "<<std::endl;
-            }
-            m_properties_ssbo.unmapBuffer();
-            glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT);
-            std::cout<<std::endl<<"--------------------------------------------------------------------"<<std::endl;
+            // std::cout<<"VELOCITIES: "<<std::endl;
+            // m_properties_ssbo.bind();
+            // obj2 = (physics::Properties *)m_properties_ssbo.readData();
+            // for(int i = 0; i < sim_spheres.size(); i++){
+            //     glm::vec3 velocity = obj2[i].velocity;
+            //     glm::vec3 ang = obj2[i].angular_velocity;
+            //     float invMass =  obj2[i].inverseMass;
+            //     std::cout<<"Object velocity "<<i <<": "<<velocity.x<<" "<<velocity.y<<" "<<velocity.z
+            //     <<" angualr: "<<ang.x<<" "<<ang.y<<" "<<ang.z<<" InvMass :" <<invMass<<" | "<<std::endl;
+            // }
+            // m_properties_ssbo.unmapBuffer();
+            // glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_BUFFER_UPDATE_BARRIER_BIT);
+            // std::cout<<std::endl<<"--------------------------------------------------------------------"<<std::endl;
 
-            //------------------------------------------------------------------//
+            // //------------------------------------------------------------------//
 
 
         }
@@ -382,7 +393,7 @@ void GpuSimulator::initializeData(){
         // sim_properties[i].velocity = glm::linearRand(glm::vec3(-0.05f), glm::vec3(0.05f));
         sim_properties[i].velocity = glm::vec3(0.0f);
         sim_properties[i].acceleration = glm::vec3(0.0f);
-        sim_properties[i].angular_velocity = glm::linearRand(glm::vec3(-0.05f), glm::vec3(0.05f));
+        sim_properties[i].angular_velocity = glm::linearRand(glm::vec3(-0.2f), glm::vec3(0.2f));
         // sim_properties[i].angular_velocity = glm::vec3(0.0f);
         sim_properties[i].angular_acceleration = glm::vec3(0.0f);
 
@@ -392,11 +403,11 @@ void GpuSimulator::initializeData(){
         sim_properties[i].friction = 0.0f;
     }
 
-    sim_properties[sim_transforms->size() - 2].velocity = glm::vec3(-4.0f, 0.0f, 0.0f);
-    sim_properties[sim_transforms->size() - 2].angular_velocity= glm::linearRand(glm::vec3(-0.8f), glm::vec3(0.8f));
-    // sim_properties[sim_transforms->size() - 2].angular_velocity= glm::vec3(0.0f, 0.0f, 0.8f);
-    sim_properties[sim_transforms->size() - 2].inverseMass = 1.0f/9.0f;
-    sim_properties[sim_transforms->size() - 2].setInverseInertiaTensor(inverseTensor * 1.0f/9.0f);
+    sim_properties[sim_transforms->size() - 2].velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+    // sim_properties[sim_transforms->size() - 2].angular_velocity= glm::linearRand(glm::vec3(-0.8f), glm::vec3(0.8f));
+    sim_properties[sim_transforms->size() - 2].angular_velocity= glm::vec3(0.0f, 0.0f, 1.0f);
+    sim_properties[sim_transforms->size() - 2].inverseMass = 1.0f/1000.0f;
+    sim_properties[sim_transforms->size() - 2].setInverseInertiaTensor(inverseTensor * 1.0f/1000.0f);
     sim_properties[sim_transforms->size() - 2].friction = 0.0f;
 
     sim_properties[sim_transforms->size() - 1].velocity = glm::vec3(0.0f);

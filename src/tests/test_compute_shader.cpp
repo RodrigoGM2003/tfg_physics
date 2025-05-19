@@ -31,14 +31,20 @@ namespace test{
         // int grid_y = 100;
         // int grid_z = 100;
         
-        float spacing = 1.0f;
+        float spacing = 2.0f;
 
         m_instances = grid_x * grid_y * grid_z + 2;
 
         // Cube vertices
-        m_vertices = std::vector<SimpleVertex>(std::begin(CONSTANTS::CUBE_MESH_SIMPLE_VERTICES), std::end(CONSTANTS::CUBE_MESH_SIMPLE_VERTICES));
+        m_vertices = std::vector<SimpleVertex>(std::begin(CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES), std::end(CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES));
     
-        m_indices = std::vector<unsigned int>(std::begin(CONSTANTS::CUBE_MESH_INDICES), std::end(CONSTANTS::CUBE_MESH_INDICES));
+        m_indices = std::vector<unsigned int>(std::begin(CONSTANTS::DODECAHEDRON_MESH_INDICES), std::end(CONSTANTS::DODECAHEDRON_MESH_INDICES));
+
+        object_vertices = utils::extractPositions(CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES, std::size(CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES));
+        object_normals = utils::extractNormals  (CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES, std::size(CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES));
+        object_edges = utils::extractEdges    (CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES,
+                                CONSTANTS::DODECAHEDRON_MESH_INDICES,
+                                std::size(CONSTANTS::DODECAHEDRON_MESH_INDICES));
 
         // Initialize m_colors with the number of instances
         m_colors = new std::vector<glm::vec4>(m_instances, glm::vec4(1.0f));
@@ -86,18 +92,28 @@ namespace test{
         m_model_matrices->at(m_instances - 2) = model;
 
         model = glm::mat4(1.0f);
-        scale = glm::vec3(50.0f);                   // Uniform scale
-        position = glm::vec3(0.0f, -35.0f, 0.0f);
+        scale = glm::vec3(50.0f);                  // Uniform scale
+        position = glm::vec3(0.0f, -75.0f, 0.0f);
+        float angle  = glm::radians(45.0f);         // rotate 45°
+
         
-        model = glm::translate(model, position);              // Then translate
-        model = glm::scale(model, scale);                     // Scale first
+        model = glm::translate(model, position);          // T
+        model = glm::rotate   (model, angle, glm::vec3(1,0,0));  // R_y
+        model = glm::scale    (model, scale);             // S
         
         m_model_matrices->at(m_instances - 1) = model;
         
         m_cube.setData(m_vertices, m_indices, *m_model_matrices, *m_colors, m_instances);
         m_shader.setShader("tex_gpu_renderer.glsl");
 
-        m_simulator = new GpuSimulator(m_model_matrices, &m_vertices, &m_indices);
+        m_simulator = new GpuSimulator(
+            m_model_matrices, 
+            &m_vertices, 
+            &m_indices,
+            &object_vertices,
+            &object_normals,
+            &object_edges
+        );
 
         m_light_shader.setShader("light.glsl");
 

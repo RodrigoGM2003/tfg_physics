@@ -27,7 +27,7 @@ layout(std430, binding = 30) buffer DeltaWBuffer {
 };
 
 uniform float delta_time;
-uniform vec3 gravity = vec3(0.0f, -0.098f, 0.0f);
+uniform vec3 gravity = vec3(0.0f, -0.1f, 0.0f);
 // uniform vec3 gravity = vec3(0.0f, 0.0f, 0.0f);
 
 layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;

@@ -48,8 +48,8 @@ void main() {
 
     float BaumgarteBeta = 0.1;
     float BaumgarteSlop = 0.01;
-    float DefaultRestitution = 1.0; 
-    float DefaultFrictionCoefficient = 0.0;
+    float DefaultRestitution = 0.5; 
+    float DefaultFrictionCoefficient = 0.4;
 
     if (gid >= collisionCount ||  delta_time < 0.01f) {
         return; // Exit if gid is out of bounds

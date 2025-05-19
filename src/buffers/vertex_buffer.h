@@ -17,10 +17,10 @@ public:
 };
 
 struct SimpleVertex{
-    public:
-        float position[3];
-        float normal[3];
-    };
+public:
+    float position[3];
+    float normal[3];
+};
        
     
 

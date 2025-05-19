@@ -50,6 +50,19 @@ namespace utils{
      */
     physics::AABB updateAABB(const physics::AABB& aabb, const glm::mat4* transform);
 
+    // Helper typedef for a float4
+    // Epsilon for float comparisons
+
+
+    void normalize3(float v[3]);
+    void canonicalize3(glm::vec3 &v);
+    bool almostEqual4(const glm::vec4 &a, const glm::vec4 &b);
+    std::vector<glm::vec4> extractPositions(const SimpleVertex* verts, size_t count);
+    std::vector<glm::vec4> extractNormals(const SimpleVertex* verts, size_t count);
+    std::vector<glm::vec4> extractEdges(
+            const SimpleVertex* verts,
+            const unsigned int* indices,
+            size_t idxCount);
 }
 
 

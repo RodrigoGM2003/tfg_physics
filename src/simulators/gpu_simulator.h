@@ -21,14 +21,14 @@ private:
     std::vector<glm::mat4>* sim_transforms;
     const std::vector<SimpleVertex>* sim_static_vertices; //SimpleVertex data
     const std::vector<unsigned int>* sim_static_indices; //SimpleVertex indices
+    const std::vector<glm::vec4>* m_object_vertices; 
+    const std::vector<glm::vec4>* m_object_normals; 
+    const std::vector<glm::vec4>* m_object_edges; 
 
     std::vector<physics::AABB> sim_aabbs;
     std::vector<glm::vec4> sim_spheres;
     std::vector<physics::Properties> sim_properties;
 
-    std::vector<glm::vec4> m_object_vertices; 
-    std::vector<glm::vec4> m_object_normals; 
-    std::vector<glm::vec4> m_object_edges; 
     // std::vector<unsigned int> m_object_edges; 
 
     std::vector<float> m_normal_impulses;
@@ -69,7 +69,14 @@ public:
      * @param static_vertices pointer to the original vertices of the geometry
      * @param static_indices pointer to the order in which each triangle is being drawn
      */
-    GpuSimulator(std::vector<glm::mat4>* transforms, const std::vector<SimpleVertex>* static_vertices, const std::vector<unsigned int>* static_indices);
+    GpuSimulator(
+        std::vector<glm::mat4>* transforms, 
+        const std::vector<SimpleVertex>* static_vertices, 
+        const std::vector<unsigned int>* static_indices,
+        const std::vector<glm::vec4>* object_vertices,
+        const std::vector<glm::vec4>* object_normals, 
+        const std::vector<glm::vec4>* object_edges    
+    );
     
     /**
      * @brief class destroyer. The memory is not dereferenced.

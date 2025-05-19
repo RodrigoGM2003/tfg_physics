@@ -21,9 +21,9 @@ namespace test{
         m_noise_intensity(0.0f) {
 
         //Object distribution grid
-        int grid_x = 1;
-        int grid_y = 1;
-        int grid_z = 1;
+        int grid_x = 0;
+        int grid_y = 0;
+        int grid_z = 0;
         // int grid_x = 32;
         // int grid_y = 32;
         // int grid_z = 32;
@@ -39,6 +39,12 @@ namespace test{
         m_vertices = std::vector<SimpleVertex>(std::begin(CONSTANTS::CUBE_MESH_SIMPLE_VERTICES), std::end(CONSTANTS::CUBE_MESH_SIMPLE_VERTICES));
     
         m_indices = std::vector<unsigned int>(std::begin(CONSTANTS::CUBE_MESH_INDICES), std::end(CONSTANTS::CUBE_MESH_INDICES));
+
+        object_vertices = utils::extractPositions(CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES, std::size(CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES));
+        object_normals = utils::extractNormals  (CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES, std::size(CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES));
+        object_edges = utils::extractEdges    (CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES,
+                                CONSTANTS::DODECAHEDRON_MESH_INDICES,
+                                std::size(CONSTANTS::DODECAHEDRON_MESH_INDICES));
 
         // Initialize m_colors with the number of instances
         m_colors = new std::vector<glm::vec4>(m_instances, glm::vec4(1.0f));
@@ -77,7 +83,7 @@ namespace test{
         }
 
         glm::mat4 model = glm::mat4(1.0f);
-        glm::vec3 scale = glm::vec3(3.0f);                   // Uniform scale
+        glm::vec3 scale = glm::vec3(1.0f);                   // Uniform scale
         glm::vec3 position = glm::vec3(-20.0f, 0.0f, 0.0f);
         
         model = glm::translate(model, position);              // Then translate
@@ -97,7 +103,14 @@ namespace test{
         m_cube.setData(m_vertices, m_indices, *m_model_matrices, *m_colors, m_instances);
         m_shader.setShader("tex_gpu_renderer.glsl");
 
-        m_simulator = new GpuSimulator(m_model_matrices, &m_vertices, &m_indices);
+        m_simulator = new GpuSimulator(
+            m_model_matrices, 
+            &m_vertices, 
+            &m_indices,
+            &object_vertices,
+            &object_normals,
+            &object_edges
+        );
 
         m_light_shader.setShader("light.glsl");
 

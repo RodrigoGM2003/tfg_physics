@@ -227,8 +227,8 @@ void main() {
         // This is a common way to get a reasonable contact point from SAT.
         // vec3 supportA_world = getSupportVertexWorld(o1.transform, collision.axis, numVertices);
         // vec3 supportB_world = getSupportVertexWorld(o2.transform, -collision.axis, numVertices);
-        vec3 supportA_world = getSupportVertexWorld(o1.transform, cTC, numVertices);
-        vec3 supportB_world = getSupportVertexWorld(o2.transform, -cTC, numVertices);
+        vec3 supportA_world = getSupportVertexWorld(o1.transform, collision.axis, numVertices);
+        vec3 supportB_world = getSupportVertexWorld(o2.transform, -collision.axis, numVertices);
 
 
         // The contact point can be on A, on B, or halfway.
@@ -243,10 +243,12 @@ void main() {
         // Using the midpoint of supports is a decent general approximation:
         // contact.rALocal.xyz = contactPointWorld - pos1;
         // contact.rBLocal.xyz = contactPointWorld - pos2;
-        contact.rALocal.xyz = collision.aOnB ? supportA_world : supportA_world ;
-        contact.rALocal.xyz -= pos1;
-        contact.rBLocal.xyz = collision.aOnB ? supportA_world : supportA_world ;
-        contact.rBLocal.xyz -= pos2;
+        // contact.rALocal.xyz = collision.aOnB ? supportB_world : supportA_world ;
+        // contact.rALocal.xyz -= pos1;
+        // contact.rBLocal.xyz = collision.aOnB ? supportB_world : supportA_world ;
+        // contact.rBLocal.xyz -= pos2;
+        contact.rALocal.xyz = supportA_world - pos1;
+        contact.rBLocal.xyz = supportB_world - pos2;
 
         // If you have 'radius' in PropertiesStruct and want sphere-like contacts:
         // (This would require PropertiesBuffer here)

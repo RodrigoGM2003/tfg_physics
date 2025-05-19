@@ -29,9 +29,6 @@
 #include "vertex_buffer_layout.h"
 #include "shader.h"
 
-#include "tests/test_refactor.h"
-#include "tests/test_multiple.h"
-#include "tests/test_lights.h"
 #include "tests/test_compute_shader.h"
 #include "tests/test_rotation.h"
 
@@ -223,11 +220,16 @@ void mainLoop() {
     test::Test* current_test = nullptr;
     test::TestMenu* test_menu = new test::TestMenu(current_test);
     current_test = test_menu;
-    test_menu->registerTest<test::TestRefactor>("Refactor");
-    test_menu->registerTest<test::TestMultiple>("Multiple");
-    test_menu->registerTest<test::TestLights>("Lights");
+    // test_menu->registerTest<test::TestRefactor>("Refactor");
+    // test_menu->registerTest<test::TestMultiple>("Multiple");
+    // test_menu->registerTest<test::TestLights>("Lights");
     test_menu->registerTest<test::TestComputeShader>("ComputeShader");
     test_menu->registerTest<test::TestRotation>("Rotation");
+    // test_menu->registerTest<test::TestRefactor>("1. Colision simple entre 2 cuerpos");
+    // test_menu->registerTest<test::TestMultiple>("2. Apilamiento de multiples objetos");
+    // test_menu->registerTest<test::TestLights>("3. Colisiones complejas sin gravedad");
+    // test_menu->registerTest<test::TestComputeShader>("4. Colisiones complejas con gravedad");
+    // test_menu->registerTest<test::TestRotation>("5. Entorno uniforme");
 
     // Variables to handle key press state
     bool r_key_pressed = false;

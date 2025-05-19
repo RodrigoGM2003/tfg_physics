@@ -44,6 +44,9 @@ namespace test{
 
         std::vector<SimpleVertex> m_vertices;
         std::vector<unsigned int> m_indices;
+        std::vector<glm::vec4> object_vertices;
+        std::vector<glm::vec4> object_normals;
+        std::vector<glm::vec4> object_edges;
         GpuMesh m_cube;
 
         Camera m_camera;

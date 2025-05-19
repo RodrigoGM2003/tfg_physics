@@ -60,7 +60,7 @@ void main() {
     // const float beta = 0.1, slop = 0.01, eps = 1e-5;
 
     float e = 0.0;          //Restitution
-    float mu = 0.1;         //Friction
+    float mu = 0.5;         //Friction
     const float beta = 0.1; //Baumgarte Beta
     const float slop = 0.01;      //Baumgarte slop
     const float eps = 1e-5;        //Epsilon
@@ -96,22 +96,48 @@ void main() {
         DwA -= IinvA * cross(rA, Pn);
         DwB += IinvB * cross(rB, Pn);
 
+        // // ---- Friction ----
+        // vec3 vt = relV - vn * n;
+        // float vt_len = length(vt);
+        // if (vt_len > eps) {
+        //     vec3 t = vt / vt_len;
+        //     vec3 ra_t = cross(rA, t);
+        //     vec3 rb_t = cross(rB, t);
+        //     float Kt = invM_A + invM_B
+        //              + dot(t, cross(IinvA * ra_t, rA))
+        //              + dot(t, cross(IinvB * rb_t, rB));
+
+        //     float jt = (Kt > eps) ? vt_len / Kt : 0.0;
+        //     jt = clamp(jt, -mu * jn, mu * jn);
+
+        //     vec3 Pt = jt * t;
+        //     DvA -= Pt * invM_A;  
+        //     DvB += Pt * invM_B;
+        //     DwA -= IinvA * cross(rA, Pt);
+        //     DwB += IinvB * cross(rB, Pt);
+        // }
         // ---- Friction ----
         vec3 vt = relV - vn * n;
         float vt_len = length(vt);
         if (vt_len > eps) {
             vec3 t = vt / vt_len;
+            // ... (calculation of Kt is okay) ...
             vec3 ra_t = cross(rA, t);
             vec3 rb_t = cross(rB, t);
             float Kt = invM_A + invM_B
-                     + dot(t, cross(IinvA * ra_t, rA))
-                     + dot(t, cross(IinvB * rb_t, rB));
+                    + dot(t, cross(IinvA * ra_t, rA))
+                    + dot(t, cross(IinvB * rb_t, rB));
 
-            float jt = (Kt > eps) ? vt_len / Kt : 0.0;
-            jt = clamp(jt, -mu * jn, mu * jn);
+
+            float jt_ideal = 0.0f; // Initialize
+            if (Kt > eps) {
+                jt_ideal = -vt_len / Kt; // CORRECTED: Impulse to oppose relative motion
+            }
+
+            float jt = clamp(jt_ideal, -mu * jn, mu * jn); // mu must be > 0 for friction to act
 
             vec3 Pt = jt * t;
-            DvA -= Pt * invM_A;  
+            DvA -= Pt * invM_A;
             DvB += Pt * invM_B;
             DwA -= IinvA * cross(rA, Pt);
             DwB += IinvB * cross(rB, Pt);
