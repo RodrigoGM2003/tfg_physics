@@ -19,13 +19,15 @@ GpuSimulator::GpuSimulator(
     const std::vector<unsigned int>* static_indices,
     const std::vector<glm::vec4>* object_vertices,
     const std::vector<glm::vec4>* object_normals, 
-    const std::vector<glm::vec4>* object_edges
+    const std::vector<glm::vec4>* object_edges,
+    std::vector<physics::Properties>* properties
 ) : sim_transforms(transforms), 
     sim_static_vertices(static_vertices), 
     sim_static_indices(static_indices),
     m_object_vertices(object_vertices),
     m_object_normals(object_normals),
-    m_object_edges(object_edges)
+    m_object_edges(object_edges),
+    sim_properties(properties)
     {
 
     initializeData();
@@ -50,6 +52,7 @@ GpuSimulator::GpuSimulator(
     //Resolution phase shaders
     m_impulse_phase_shader.setShader("jacobi_friction_impulse.glsl");
     // m_impulse_phase_shader.setShader("jacobi_rotation_impulse.glsl");
+    // m_impulse_phase_shader.setShader("constraint_rotation.glsl");
     m_impulse_phase_shader.useTimer(false);
     m_impulse_phase_shader.bind();
     
@@ -63,7 +66,7 @@ GpuSimulator::GpuSimulator(
     m_transform_ssbo.setBuffer(sim_transforms->data(), sim_transforms->size() * sizeof(glm::mat4), GL_DYNAMIC_DRAW);
     m_transform_ssbo.unbind();
 
-    m_properties_ssbo.setBuffer(sim_properties.data(), sim_properties.size() * sizeof(physics::Properties), GL_DYNAMIC_DRAW);
+    m_properties_ssbo.setBuffer(sim_properties->data(), sim_properties->size() * sizeof(physics::Properties), GL_DYNAMIC_DRAW);
     m_properties_ssbo.unbind();
 
     m_results_ssbo.setBuffer(nullptr, sim_transforms->size() * sizeof(int), GL_DYNAMIC_DRAW);
@@ -80,43 +83,6 @@ GpuSimulator::GpuSimulator(
 
     m_second_results_ssbo.setBuffer(nullptr, sim_transforms->size() * sizeof(int), GL_DYNAMIC_DRAW);
     m_second_results_ssbo.unbind();
-
-    // m_object_vertices = {
-    //     {-0.5f, -0.5f, -0.5f, 1.0f},   
-    //     { 0.5f, -0.5f, -0.5f, 1.0f},   
-    //     { 0.5f, -0.5f,  0.5f, 1.0f},   
-    //     {-0.5f, -0.5f,  0.5f, 1.0f},   
-
-    //     {-0.5f,  0.5f, -0.5f, 1.0f},   
-    //     { 0.5f,  0.5f, -0.5f, 1.0f},   
-    //     { 0.5f,  0.5f,  0.5f, 1.0f},   
-    //     {-0.5f,  0.5f,  0.5f, 1.0f}   
-    // };
-
-    // m_object_normals = {
-    //     {1.0f, 0.0f, 0.0f, 0.0f},
-    //     {0.0f, 1.0f, 0.0f, 0.0f},
-    //     {0.0f, 0.0f, 1.0f, 0.0f}
-    // };
-
-    // m_object_edges = {
-    //     {1.0f, 0.0f, 0.0f, 0.0f},
-    //     {0.0f, 1.0f, 0.0f, 0.0f},
-    //     {0.0f, 0.0f, 1.0f, 0.0f},
-    // };
-
-    // m_object_vertices = utils::extractPositions(CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES, std::size(CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES));
-    // m_object_normals = utils::extractNormals  (CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES, std::size(CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES));
-    // m_object_edges = utils::extractEdges    (CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES,
-    //                             CONSTANTS::DODECAHEDRON_MESH_INDICES,
-    //                             std::size(CONSTANTS::DODECAHEDRON_MESH_INDICES));
-
-
-    // for(auto a : m_object_normals){
-    //     std::cout<<a.x<<"   "<<a.y<<"   "<<a.z<<"   "<<a.w<<"   ";
-    //     std::cout<<std::endl;
-    // }
-
 
     m_object_vertices_ssbo.setBuffer(m_object_vertices->data(), m_object_vertices->size() * sizeof(glm::vec4), GL_STATIC_DRAW);
     m_object_vertices_ssbo.unbind();
@@ -148,6 +114,14 @@ GpuSimulator::GpuSimulator(
     m_deltaW_ssbo.setBuffer(deltaW.data(), sim_transforms->size() * sizeof(glm::vec4), GL_DYNAMIC_DRAW);
     m_deltaW_ssbo.unbind();
 
+    std::vector<float> lambdas(sim_transforms->size(), 0.0f);
+    m_lambdas_ssbo.setBuffer(lambdas.data(), sim_transforms->size() * sizeof(float), GL_DYNAMIC_DRAW);
+    m_lambdas_ssbo.unbind();
+
+    std::vector<float> new_lambdas(sim_transforms->size(), 0.0f);
+    m_new_lambdas_ssbo.setBuffer(new_lambdas.data(), sim_transforms->size() * sizeof(float), GL_DYNAMIC_DRAW);
+    m_new_lambdas_ssbo.unbind();
+
     // m_delta_angular_impulses_ssbo.setBuffer(m_delta_angular_impulses.data(), sim_transforms->size() * sizeof(glm::vec3), GL_DYNAMIC_DRAW);
     // m_delta_angular_impulses_ssbo.unbind();
     //---------------------------------
@@ -171,7 +145,8 @@ GpuSimulator::GpuSimulator(
     m_tangent_impulses_ssbo.bindToBindingPoint(28);
     m_deltaV_ssbo.bindToBindingPoint(29);
     m_deltaW_ssbo.bindToBindingPoint(30);
-    // m_delta_angular_impulses_ssbo.bindToBindingPoint(10);
+    m_lambdas_ssbo.bindToBindingPoint(31);
+    m_new_lambdas_ssbo.bindToBindingPoint(32);
 }
 
 GpuSimulator::~GpuSimulator(){
@@ -180,14 +155,12 @@ GpuSimulator::~GpuSimulator(){
     sim_static_indices = nullptr;
 }
 
-void printVec3(const glm::vec3& v, const std::string& name) {
-    std::cout << name << ": (" << v.x << ", " << v.y << ", " << v.z << ")" << std::endl;
-}
-void GpuSimulator::update(float delta_time){
+void GpuSimulator::update(float delta_time, glm::vec3 gravity){
     //Transform phase
     int work_groups = (sim_transforms->size() + 256 - 1) / 256;
     m_transform_shader.use();
     m_transform_shader.setUniform1f("delta_time", delta_time);
+    m_transform_shader.setUniform3f("gravity", gravity.x, gravity.y, gravity.z);
     m_transform_shader.dispatch(work_groups, 1, 1);
     m_transform_shader.waitForCompletion(GL_SHADER_STORAGE_BARRIER_BIT);
 
@@ -341,8 +314,6 @@ void GpuSimulator::update(float delta_time){
             // std::cout<<std::endl<<"--------------------------------------------------------------------"<<std::endl;
 
             // //------------------------------------------------------------------//
-
-
         }
     }
 }
@@ -354,7 +325,6 @@ void GpuSimulator::initializeData(){
     std::cout<<base_radius<<std::endl;
     sim_spheres.resize(sim_transforms->size(), glm::vec4(0.0f, 0.0f, 0.0f, base_radius));
 
-    sim_properties.resize(sim_transforms->size());
 
     float mass = 1.0f;
     float side = 1.0f;
@@ -390,32 +360,7 @@ void GpuSimulator::initializeData(){
         sim_spheres[i][1] = (*transform)[3][1];
         sim_spheres[i][2] = (*transform)[3][2];
 
-        // sim_properties[i].velocity = glm::linearRand(glm::vec3(-0.05f), glm::vec3(0.05f));
-        sim_properties[i].velocity = glm::vec3(0.0f);
-        sim_properties[i].acceleration = glm::vec3(0.0f);
-        sim_properties[i].angular_velocity = glm::linearRand(glm::vec3(-0.2f), glm::vec3(0.2f));
-        // sim_properties[i].angular_velocity = glm::vec3(0.0f);
-        sim_properties[i].angular_acceleration = glm::vec3(0.0f);
-
-        // sim_properties[i].inverseMass = i % 2 == 0 ? 0.0f : 1.0f;
-        sim_properties[i].inverseMass = 1.0f;
-        sim_properties[i].setInverseInertiaTensor(inverseTensor);
-        sim_properties[i].friction = 0.0f;
     }
-
-    sim_properties[sim_transforms->size() - 2].velocity = glm::vec3(0.0f, 0.0f, 0.0f);
-    // sim_properties[sim_transforms->size() - 2].angular_velocity= glm::linearRand(glm::vec3(-0.8f), glm::vec3(0.8f));
-    sim_properties[sim_transforms->size() - 2].angular_velocity= glm::vec3(0.0f, 0.0f, 1.0f);
-    sim_properties[sim_transforms->size() - 2].inverseMass = 1.0f/1000.0f;
-    sim_properties[sim_transforms->size() - 2].setInverseInertiaTensor(inverseTensor * 1.0f/1000.0f);
-    sim_properties[sim_transforms->size() - 2].friction = 0.0f;
-
-    sim_properties[sim_transforms->size() - 1].velocity = glm::vec3(0.0f);
-    sim_properties[sim_transforms->size() - 1].angular_velocity= glm::vec3(0.0f);
-    sim_properties[sim_transforms->size() - 1].inverseMass = 0.0f;
-    // sim_properties[sim_transforms->size() - 1].setInverseInertiaTensor(inverseTensor);
-    sim_properties[sim_transforms->size() - 1].setInverseInertiaTensor(glm::mat3(0.0f));
-    sim_properties[sim_transforms->size() - 1].friction = 0.0f;
 
 
     // m_normal_impulses.resize(sim_spheres.size() * sim_spheres.size() , 0);

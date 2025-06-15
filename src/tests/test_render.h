@@ -1,5 +1,5 @@
-#ifndef TEST_COMPUTE_SHADER_H
-#define TEST_COMPUTE_SHADER_H
+#ifndef TEST_RENDER_H
+#define TEST_RENDER_H
 
 #pragma once
 
@@ -20,10 +20,10 @@
 
 namespace test{
 
-    class TestComputeShader : public Test{
+    class TestRender : public Test{
     private:
         const unsigned int m_width = 1920;
-        const unsigned int m_height =1080;
+        const unsigned int m_height= 1080;
 
         unsigned int m_instances;
         // unsigned int m_instances = 1000;
@@ -41,6 +41,7 @@ namespace test{
         Shader m_light_shader;
 
         float m_time_factor = 1.0f;
+        glm::vec3 m_gravity = glm::vec3(0.0f, -0.1f, 0.0f); 
 
         std::vector<SimpleVertex> m_vertices;
         std::vector<unsigned int> m_indices;
@@ -52,9 +53,9 @@ namespace test{
 
         Camera m_camera;
 
-        std::vector<glm::mat4> m_cube_models;
+        ShaderStorageBuffer m_transform_ssbo;
 
-        Simulable* m_simulator;
+        std::vector<glm::mat4> m_cube_models;
 
         std::unique_ptr<Texture> m_noiseTexture;
         float m_noise_intensity;
@@ -63,8 +64,8 @@ namespace test{
         float m_linear = 0.00f;
 
     public:
-        TestComputeShader();
-        ~TestComputeShader();
+        TestRender();
+        ~TestRender();
 
         void onUpdate(float deltaTime) override;
         void onRender() override;
@@ -74,4 +75,4 @@ namespace test{
 }
 
 
-#endif // TEST_COMPUTE_SHADER_H
+#endif // TEST_RENDER_H

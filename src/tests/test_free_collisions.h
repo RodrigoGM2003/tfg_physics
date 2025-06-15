@@ -1,5 +1,5 @@
-#ifndef TEST_COMPUTE_SHADER_H
-#define TEST_COMPUTE_SHADER_H
+#ifndef TEST_FREE_COLLISIONS_H
+#define TEST_FREE_COLLISIONS_H
 
 #pragma once
 
@@ -15,15 +15,15 @@
 #include "../camera.h"
 #include "../meshes/mesh.h"
 #include "../meshes/gpu_mesh.h"
-#include "../simulators/gpu_simulator.h"
+#include "../simulators/collision_detector.h"
 #include "../texture.h"
 
 namespace test{
 
-    class TestComputeShader : public Test{
+    class TestFreeCollisions : public Test{
     private:
         const unsigned int m_width = 1920;
-        const unsigned int m_height =1080;
+        const unsigned int m_height = 1080;
 
         unsigned int m_instances;
         // unsigned int m_instances = 1000;
@@ -63,8 +63,8 @@ namespace test{
         float m_linear = 0.00f;
 
     public:
-        TestComputeShader();
-        ~TestComputeShader();
+        TestFreeCollisions();
+        ~TestFreeCollisions();
 
         void onUpdate(float deltaTime) override;
         void onRender() override;
@@ -74,4 +74,4 @@ namespace test{
 }
 
 
-#endif // TEST_COMPUTE_SHADER_H
+#endif // TEST_FREE_COLLISIONS_H

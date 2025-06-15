@@ -46,11 +46,6 @@ struct ContactManifold {
     vec4 rBWorld;
 };
 
-// Add the new output buffer for manifolds
-layout(std430, binding = 26) buffer ContactManifoldBuffer {
-    ContactManifold manifolds[];
-};
-
 
 layout(local_size_x = 512, local_size_y = 1, local_size_z = 1) in;
 
@@ -147,51 +142,8 @@ void main() {
         }
     }
 
-    // Test cross-products of edges
-    for (uint i = 0; i < numEdges && collision.colliding; i++) {
-        vec4 edge1 = o1.transform * objectEdges[i];
-
-        for (uint j = 0; j < numEdges && collision.colliding; j++) {
-            vec4 edge2 = o2.transform * objectEdges[j];
-            vec3 axis = cross(edge1.xyz, edge2.xyz);
-
-            if (length(axis) < 0.001) continue;
-            
-            axis = normalize(axis);
-
-            Collision attempt = checkOverlap(axis, o1.transform, o2.transform, numVertices);
-        
-            if(!attempt.colliding){
-                collision = attempt;
-            }
-            else{
-                collision = attempt.depth < collision.depth ? attempt : collision;
-                featureIndexA = i;
-                featureIndexB = j;
-            }
-        }
-    }
-
-    
-    vec3 pos1 = o1.transform[3].xyz;
-    vec3 pos2 = o2.transform[3].xyz;
-    collision.axis = dot(collision.axis, pos2 - pos1) < 0.0 ? -collision.axis : collision.axis;
-
-
-    if (collision.colliding) {
-        ContactManifold contact;
-        contact.indexA = o1.idx;
-        contact.indexB = o2.idx;
-        contact.normal.xyz = collision.axis.xyz;
-        contact.depth = collision.depth;
-
-
-        uint index = atomicAdd(collisionCount, 1);
-        if(index < manifolds.length())
-            manifolds[index] = contact;
-    }
-
     // Mark both objects in the collision pair (for visualization or debugging)
-    // secondResults[o1.idx] = collision.colliding ? -1 : 1;
-    // results[o2.idx] = collision.colliding ? -1 : 1;
+    int value = collision.colliding ? 1 : 0;
+    atomicAdd(results[o1.idx], value);
+    atomicAdd(results[o2.idx], value);
 }

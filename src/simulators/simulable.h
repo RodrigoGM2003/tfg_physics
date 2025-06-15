@@ -18,7 +18,7 @@ public:
     /**
      * @brief take a step on the simulation accounting for delta_time seconds
      */
-    virtual void update(float delta_time) = 0;
+    virtual void update(float delta_time, glm::vec3 gravity = glm::vec3(0.0f, 0.0f, 0.0f)) = 0;
 };
 
 

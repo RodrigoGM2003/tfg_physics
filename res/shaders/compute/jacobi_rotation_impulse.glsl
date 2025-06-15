@@ -96,26 +96,6 @@ void main() {
         DwA -= IinvA * cross(rA, Pn);
         DwB += IinvB * cross(rB, Pn);
 
-        // // ---- Friction ----
-        // vec3 vt = relV - vn * n;
-        // float vt_len = length(vt);
-        // if (vt_len > eps) {
-        //     vec3 t = vt / vt_len;
-        //     vec3 ra_t = cross(rA, t);
-        //     vec3 rb_t = cross(rB, t);
-        //     float Kt = invM_A + invM_B
-        //              + dot(t, cross(IinvA * ra_t, rA))
-        //              + dot(t, cross(IinvB * rb_t, rB));
-
-        //     float jt = (Kt > eps) ? vt_len / Kt : 0.0;
-        //     jt = clamp(jt, -mu * jn, mu * jn);
-
-        //     vec3 Pt = jt * t;
-        //     DvA -= Pt * invM_A;  
-        //     DvB += Pt * invM_B;
-        //     DwA -= IinvA * cross(rA, Pt);
-        //     DwB += IinvB * cross(rB, Pt);
-        // }
         // ---- Friction ----
         vec3 vt = relV - vn * n;
         float vt_len = length(vt);

@@ -1,4 +1,4 @@
-#include "test_compute_shader.h"
+#include "test_free_collisions.h"
 #include "../renderer.h"
 
 #include <random>
@@ -18,29 +18,33 @@ extern GLFWwindow * c_window;
 
 namespace test{
 
-    TestComputeShader::TestComputeShader()
+    TestFreeCollisions::TestFreeCollisions()
         : m_camera(m_width, m_height, glm::vec3(0.0f, 0.0f, 100.0f)),
         m_noise_intensity(0.0f) {
 
         //Object distribution grid
-        int grid_x = 10;
+        int grid_x = 40;
         int grid_y = 40;
-        int grid_z = 10;
+        int grid_z = 40;
+        // int grid_x = 100;
+        // int grid_y = 100;
+        // int grid_z = 100;
         
-        float spacing = 2.0f;
+        float spacing = 5.0f;
 
-        m_instances = grid_x * grid_y * grid_z + 1;
+        m_instances = grid_x * grid_y * grid_z;
+
 
         // Cube vertices
-        m_vertices = std::vector<SimpleVertex>(std::begin(CONSTANTS::CUBE_MESH_SIMPLE_VERTICES), std::end(CONSTANTS::CUBE_MESH_SIMPLE_VERTICES));
+        m_vertices = std::vector<SimpleVertex>(std::begin(CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES), std::end(CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES));
     
-        m_indices = std::vector<unsigned int>(std::begin(CONSTANTS::CUBE_MESH_INDICES), std::end(CONSTANTS::CUBE_MESH_INDICES));
+        m_indices = std::vector<unsigned int>(std::begin(CONSTANTS::DODECAHEDRON_MESH_INDICES), std::end(CONSTANTS::DODECAHEDRON_MESH_INDICES));
 
-        object_vertices = utils::extractPositions(CONSTANTS::CUBE_MESH_SIMPLE_VERTICES, std::size(CONSTANTS::CUBE_MESH_SIMPLE_VERTICES));
-        object_normals = utils::extractNormals  (CONSTANTS::CUBE_MESH_SIMPLE_VERTICES, std::size(CONSTANTS::CUBE_MESH_SIMPLE_VERTICES));
-        object_edges = utils::extractEdges    (CONSTANTS::CUBE_MESH_SIMPLE_VERTICES,
-                                CONSTANTS::CUBE_MESH_INDICES,
-                                std::size(CONSTANTS::CUBE_MESH_INDICES));
+        object_vertices = utils::extractPositions(CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES, std::size(CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES));
+        object_normals = utils::extractNormals  (CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES, std::size(CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES));
+        object_edges = utils::extractEdges    (CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES,
+                                CONSTANTS::DODECAHEDRON_MESH_INDICES,
+                                std::size(CONSTANTS::DODECAHEDRON_MESH_INDICES));
 
         // Initialize m_colors with the number of instances
         m_colors = new std::vector<glm::vec4>(m_instances, glm::vec4(1.0f));
@@ -51,12 +55,12 @@ namespace test{
         static std::mt19937 gen(42);
         std::uniform_real_distribution<float> dist(0.0f, 1.0f);
 
-        for (int i = 0; i < m_instances; i++) {
-            m_colors->at(i) = glm::vec4(dist(gen), dist(gen), dist(gen), 1.0f);
-        }
         // for (int i = 0; i < m_instances; i++) {
-        //     m_colors->at(i) = glm::vec4(0.2f,0.2f,0.2f, 1.0f);
-        // }   
+        //     m_colors->at(i) = glm::vec4(dist(gen), dist(gen), dist(gen), 1.0f);
+        // }
+        for (int i = 0; i < m_instances; i++) {
+            m_colors->at(i) = glm::vec4(0.2f,0.2f,0.2f, 1.0f);
+        }   
 
         m_model_matrices = new std::vector<glm::mat4>(m_instances);
         
@@ -102,43 +106,21 @@ namespace test{
             
             auto transform = &m_model_matrices->at(i);
 
-            // sim_properties[i].velocity = glm::linearRand(glm::vec3(-0.05f), glm::vec3(0.05f));
-            properties[i].velocity = glm::vec3(0.0f);
+            properties[i].velocity = glm::linearRand(glm::vec3(-0.05f), glm::vec3(0.05f));
             properties[i].acceleration = glm::vec3(0.0f);
-            properties[i].angular_velocity = glm::linearRand(glm::vec3(-0.2f), glm::vec3(0.2f));
-            properties[i].angular_velocity = glm::vec3(0.0f);
+            properties[i].angular_velocity = glm::linearRand(glm::vec3(-0.1f), glm::vec3(0.1f));
             properties[i].angular_acceleration = glm::vec3(0.0f);
 
-            // properties[i].inverseMass = i % 2 == 0 ? 0.0f : 1.0f;
             properties[i].inverseMass = 1.0f;
             properties[i].setInverseInertiaTensor(inverseTensor);
             properties[i].friction = 0.0f;
         }
-
-        properties[m_model_matrices->size() - 1].velocity = glm::vec3(0.0f);
-        properties[m_model_matrices->size() - 1].angular_velocity= glm::vec3(0.0f);
-        properties[m_model_matrices->size() - 1].inverseMass = 0.0f;
-        // properties[m_model_matrices->size() - 1].setInverseInertiaTensor(inverseTensor);
-        properties[m_model_matrices->size() - 1].setInverseInertiaTensor(glm::mat3(0.0f));
-        properties[m_model_matrices->size() - 1].friction = 0.0f;
-
-        glm::mat4 model = glm::mat4(1.0f);
-        glm::vec3 scale = glm::vec3(50.0f);                  // Uniform scale
-        glm::vec3 position = glm::vec3(0.0f, -75.0f, 0.0f);
-        float angle  = glm::radians(45.0f);         // rotate 45°
-
-        
-        model = glm::translate(model, position);          // T
-        // model = glm::rotate   (model, angle, glm::vec3(1,0,0));  // R_y
-        model = glm::scale    (model, scale);             // S
-        
-        m_model_matrices->at(m_instances - 1) = model;
         
         m_cube.setData(m_vertices, m_indices, *m_model_matrices, *m_colors, m_instances);
         m_shader.setShader("tex_gpu_renderer.glsl");
 
 
-        m_simulator = new GpuSimulator(
+        m_simulator = new CollisionDetector(
             m_model_matrices, 
             &m_vertices, 
             &m_indices,
@@ -166,18 +148,18 @@ namespace test{
         GLCall(glFrontFace(GL_CCW));
     }
 
-    TestComputeShader::~TestComputeShader(){
+    TestFreeCollisions::~TestFreeCollisions(){
         delete m_simulator;
         delete m_model_matrices;
 
     }
 
-    void TestComputeShader::onUpdate(float delta_time){ 
-        m_simulator->update(delta_time * m_time_factor, glm::vec3(0.0f, -0.1f, 0.0f));
+    void TestFreeCollisions::onUpdate(float delta_time){ 
+        m_simulator->update(delta_time * m_time_factor);
     }
 
 
-    void TestComputeShader::onRender(){
+    void TestFreeCollisions::onRender(){
         Renderer renderer;
     
         m_camera.input(c_window);
@@ -206,7 +188,7 @@ namespace test{
     }
 
 
-    void TestComputeShader::onImGuiRender(){
+    void TestFreeCollisions::onImGuiRender(){
         ImGui::Text("Lightning test");
         ImGui::Text("FPS counter");
         ImGui::SliderFloat("Sensitivity", &m_camera.m_sensitivity, 10.0f, 100.0f);

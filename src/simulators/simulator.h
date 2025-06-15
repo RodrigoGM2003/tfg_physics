@@ -38,7 +38,7 @@ public:
     /**
      * @brief take a step on the simulation accounting for delta_time seconds
      */
-    void update(float delta_time) override;
+    void update(float delta_time, glm::vec3 gravity = glm::vec3(0.0f, 0.0f, 0.0f)) override;
 
 private:
     /**

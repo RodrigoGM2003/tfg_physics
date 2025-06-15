@@ -51,7 +51,7 @@ Simulator::~Simulator(){
     sim_objects.clear();
 }
 
-void Simulator::update(float delta_time){
+void Simulator::update(float delta_time, glm::vec3 gravity){
     for (auto& object : sim_objects) {
         updateObject(object, delta_time);
     }

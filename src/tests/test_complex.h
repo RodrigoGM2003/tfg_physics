@@ -1,5 +1,5 @@
-#ifndef TEST_COMPUTE_SHADER_H
-#define TEST_COMPUTE_SHADER_H
+#ifndef TEST_COMPLEX_H
+#define TEST_COMPLEX_H
 
 #pragma once
 
@@ -20,7 +20,7 @@
 
 namespace test{
 
-    class TestComputeShader : public Test{
+    class TestComplex : public Test{
     private:
         const unsigned int m_width = 1920;
         const unsigned int m_height =1080;
@@ -41,6 +41,7 @@ namespace test{
         Shader m_light_shader;
 
         float m_time_factor = 1.0f;
+        glm::vec3 m_gravity = glm::vec3(0.0f, -0.1f, 0.0f); 
 
         std::vector<SimpleVertex> m_vertices;
         std::vector<unsigned int> m_indices;
@@ -63,8 +64,8 @@ namespace test{
         float m_linear = 0.00f;
 
     public:
-        TestComputeShader();
-        ~TestComputeShader();
+        TestComplex();
+        ~TestComplex();
 
         void onUpdate(float deltaTime) override;
         void onRender() override;
@@ -74,4 +75,4 @@ namespace test{
 }
 
 
-#endif // TEST_COMPUTE_SHADER_H
+#endif // TEST_COMPLEX_H

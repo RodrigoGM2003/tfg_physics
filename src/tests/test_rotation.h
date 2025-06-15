@@ -22,8 +22,8 @@ namespace test{
 
     class TestRotation : public Test{
     private:
-        const unsigned int m_width = 1024;
-        const unsigned int m_height = 1024;
+        const unsigned int m_width = 1920;
+        const unsigned int m_height =1080;
 
         unsigned int m_instances;
         // unsigned int m_instances = 1000;
@@ -41,9 +41,11 @@ namespace test{
         Shader m_light_shader;
 
         float m_time_factor = 1.0f;
+        glm::vec3 m_gravity = glm::vec3(0.0f, 0.0f, 0.0f); 
 
         std::vector<SimpleVertex> m_vertices;
         std::vector<unsigned int> m_indices;
+        std::vector<physics::Properties> properties;
         std::vector<glm::vec4> object_vertices;
         std::vector<glm::vec4> object_normals;
         std::vector<glm::vec4> object_edges;

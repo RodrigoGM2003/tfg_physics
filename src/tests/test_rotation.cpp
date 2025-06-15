@@ -9,6 +9,8 @@
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/random.hpp" 
+#include "glm/gtx/component_wise.hpp"
 
 #include "constants.h"
 
@@ -21,9 +23,9 @@ namespace test{
         m_noise_intensity(0.0f) {
 
         //Object distribution grid
-        int grid_x = 0;
-        int grid_y = 0;
-        int grid_z = 0;
+        int grid_x = 10;
+        int grid_y = 10;
+        int grid_z = 10;
         // int grid_x = 32;
         // int grid_y = 32;
         // int grid_z = 32;
@@ -31,20 +33,20 @@ namespace test{
         // int grid_y = 100;
         // int grid_z = 100;
         
-        float spacing = 1.0f;
+        float spacing = 2.0f;
 
-        m_instances = grid_x * grid_y * grid_z + 2;
+        m_instances = grid_x * grid_y * grid_z + 1;
 
         // Cube vertices
-        m_vertices = std::vector<SimpleVertex>(std::begin(CONSTANTS::CUBE_MESH_SIMPLE_VERTICES), std::end(CONSTANTS::CUBE_MESH_SIMPLE_VERTICES));
+        m_vertices = std::vector<SimpleVertex>(std::begin(CONSTANTS::ICOSAHEDRON_MESH_SIMPLE_VERTICES), std::end(CONSTANTS::ICOSAHEDRON_MESH_SIMPLE_VERTICES));
     
-        m_indices = std::vector<unsigned int>(std::begin(CONSTANTS::CUBE_MESH_INDICES), std::end(CONSTANTS::CUBE_MESH_INDICES));
+        m_indices = std::vector<unsigned int>(std::begin(CONSTANTS::ICOSAHEDRON_MESH_INDICES), std::end(CONSTANTS::ICOSAHEDRON_MESH_INDICES));
 
-        object_vertices = utils::extractPositions(CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES, std::size(CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES));
-        object_normals = utils::extractNormals  (CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES, std::size(CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES));
-        object_edges = utils::extractEdges    (CONSTANTS::DODECAHEDRON_MESH_SIMPLE_VERTICES,
-                                CONSTANTS::DODECAHEDRON_MESH_INDICES,
-                                std::size(CONSTANTS::DODECAHEDRON_MESH_INDICES));
+        object_vertices = utils::extractPositions(CONSTANTS::ICOSAHEDRON_MESH_SIMPLE_VERTICES, std::size(CONSTANTS::ICOSAHEDRON_MESH_SIMPLE_VERTICES));
+        object_normals = utils::extractNormals  (CONSTANTS::ICOSAHEDRON_MESH_SIMPLE_VERTICES, std::size(CONSTANTS::ICOSAHEDRON_MESH_SIMPLE_VERTICES));
+        object_edges = utils::extractEdges    (CONSTANTS::ICOSAHEDRON_MESH_SIMPLE_VERTICES,
+                                CONSTANTS::ICOSAHEDRON_MESH_INDICES,
+                                std::size(CONSTANTS::ICOSAHEDRON_MESH_INDICES));
 
         // Initialize m_colors with the number of instances
         m_colors = new std::vector<glm::vec4>(m_instances, glm::vec4(1.0f));
@@ -83,22 +85,54 @@ namespace test{
         }
 
         glm::mat4 model = glm::mat4(1.0f);
-        glm::vec3 scale = glm::vec3(1.0f);                   // Uniform scale
-        glm::vec3 position = glm::vec3(-20.0f, 0.0f, 0.0f);
-        
-        model = glm::translate(model, position);              // Then translate
-        model = glm::scale(model, scale);                     // Scale first
-        
-        m_model_matrices->at(m_instances - 2) = model;
-
-        model = glm::mat4(1.0f);
-        scale = glm::vec3(50.0f);                   // Uniform scale
-        position = glm::vec3(0.0f, -28.0f, 0.0f);
+        glm::vec3 scale = glm::vec3(50.0f);                   // Uniform scale
+        glm::vec3 position = glm::vec3(0.0f, -70.0f, 0.0f);
+        float angle = 1.0f;
         
         model = glm::translate(model, position);              // Then translate
         model = glm::scale(model, scale);                     // Scale first
         
         m_model_matrices->at(m_instances - 1) = model;
+
+
+        float mass = 1.0f;
+        float side = 1.0f;
+
+        float inertia = (1.0f / 6.0f) * mass * side * side;
+        float inverseInertia = 1.0f / inertia;
+
+        glm::mat3 inverseTensor = glm::mat3(
+            1.0f / inertia, 0.0f, 0.0f,
+            0.0f, 1.0f / inertia, 0.0f,
+            0.0f, 0.0f, 1.0f / inertia
+        );
+
+        properties.resize(m_model_matrices->size());
+
+
+        std::srand(42);
+        for (int i = 0; i < m_model_matrices->size(); i++){
+            
+            auto transform = &m_model_matrices->at(i);
+
+            properties[i].velocity = glm::vec3(0.0f);
+            properties[i].acceleration = glm::vec3(0.0f);
+            properties[i].angular_velocity = glm::linearRand(glm::vec3(-0.2f), glm::vec3(0.2f));
+            properties[i].angular_acceleration = glm::vec3(0.0f);
+
+            // properties[i].inverseMass = i % 2 == 0 ? 0.0f : 1.0f;
+            properties[i].inverseMass = 1.0f;
+            properties[i].setInverseInertiaTensor(inverseTensor);
+            properties[i].friction = 0.0f;
+        }
+
+        properties[m_model_matrices->size() - 1].velocity = glm::vec3(0.0f);
+        properties[m_model_matrices->size() - 1].angular_velocity= glm::vec3(0.0f);
+        properties[m_model_matrices->size() - 1].inverseMass = 0.0f;
+        properties[m_model_matrices->size() - 1].setInverseInertiaTensor(glm::mat3(0.0f));
+        properties[m_model_matrices->size() - 1].friction = 0.0f;
+
+
         
         m_cube.setData(m_vertices, m_indices, *m_model_matrices, *m_colors, m_instances);
         m_shader.setShader("tex_gpu_renderer.glsl");
@@ -109,7 +143,8 @@ namespace test{
             &m_indices,
             &object_vertices,
             &object_normals,
-            &object_edges
+            &object_edges,
+            &properties
         );
 
         m_light_shader.setShader("light.glsl");
@@ -137,7 +172,7 @@ namespace test{
     }
 
     void TestRotation::onUpdate(float delta_time){ 
-        m_simulator->update(delta_time * m_time_factor);
+        m_simulator->update(delta_time * m_time_factor, m_gravity);
     }
 
 
@@ -177,11 +212,10 @@ namespace test{
         
         ImGui::Text("Lightning color");
         ImGui::SliderFloat4("Light color", &light_color.x, 0.0f, 1.0f);
-        
-        ImGui::Text("Positions");
-        
-        ImGui::SliderFloat("quadratic", &m_quadriatic, 0.0f, 0.01f);
-        ImGui::SliderFloat("linear", &m_linear, 0.0f, 0.01f);
+
+        ImGui::Text("Physics");
+        ImGui::SliderFloat3("Gravity", &m_gravity.x, -1.0f, 1.0f);
+
         
         ImGui::SliderFloat("Time factor", &m_time_factor, 0.0f, 100.0f);
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);

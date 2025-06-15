@@ -1,5 +1,5 @@
-#ifndef GPU_SIMULATOR_H
-#define GPU_SIMULATOR_H
+#ifndef COLLISION_DETECTOR_H
+#define COLLISION_DETECTOR_H
 
 #pragma once
 
@@ -16,7 +16,7 @@
 /**
  * @brief class representation of a simulator running on the cpu
  */
-class GpuSimulator : public Simulable{ 
+class CollisionDetector : public Simulable{ 
 private:
     std::vector<glm::mat4>* sim_transforms;
     const std::vector<SimpleVertex>* sim_static_vertices; //SimpleVertex data
@@ -53,14 +53,12 @@ private:
     ShaderStorageBuffer m_object_vertices_ssbo;
     ShaderStorageBuffer m_object_normals_ssbo;
     ShaderStorageBuffer m_object_edges_ssbo;
-    ShaderStorageBuffer m_contact_manifolds_ssbo;
-    ShaderStorageBuffer m_lambdas_ssbo;
-    ShaderStorageBuffer m_new_lambdas_ssbo;
 
-    ShaderStorageBuffer m_normal_impulses_ssbo;
-    ShaderStorageBuffer m_tangent_impulses_ssbo;
-    ShaderStorageBuffer m_deltaV_ssbo;
-    ShaderStorageBuffer m_deltaW_ssbo;
+    unsigned int frames = 0;
+    unsigned int broad_accumulator = 0;
+    unsigned int narrow_accumulator = 0;
+    float avg_narrow_time = 0;
+    float avg_broad_time = 0;
 
     unsigned int m_zero = 0;
 
@@ -71,7 +69,7 @@ public:
      * @param static_vertices pointer to the original vertices of the geometry
      * @param static_indices pointer to the order in which each triangle is being drawn
      */
-    GpuSimulator(
+    CollisionDetector(
         std::vector<glm::mat4>* transforms, 
         const std::vector<SimpleVertex>* static_vertices, 
         const std::vector<unsigned int>* static_indices,
@@ -84,7 +82,7 @@ public:
     /**
      * @brief class destroyer. The memory is not dereferenced.
      */
-    ~GpuSimulator();
+    ~CollisionDetector();
 
     /**
      * @brief take a step on the simulation accounting for delta_time seconds
@@ -102,4 +100,4 @@ private:
 
 
 
-#endif // GPU_SIMULATOR_H
+#endif // COLLISION_DETECTOR_H

@@ -29,8 +29,13 @@
 #include "vertex_buffer_layout.h"
 #include "shader.h"
 
+#include "tests/test_render.h"
+#include "tests/test_free_collisions.h"
 #include "tests/test_compute_shader.h"
 #include "tests/test_rotation.h"
+#include "tests/test_complex.h"
+#include "tests/test_complex_2.h"
+#include "tests/test_complex_3.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
@@ -43,8 +48,8 @@
 GLFWwindow * c_window = nullptr; /*Main Window*/
 
 int
-    w_width  = 1024, /*Window width*/
-    w_height = 1024; /*Window heigth*/
+    w_width  = 1920, /*Window width*/
+    w_height = 1080; /*Window heigth*/
 
 bool terminate_program = false; /*Program termination*/
 bool record = false;
@@ -53,7 +58,7 @@ unsigned int samples = 4; /*Number of samples*/
 
 unsigned int skip_frames = 2;
 
-int test_index = 4; // Update this per test, perhaps when switching tests.
+int test_index = 0; // Update this per test, perhaps when switching tests.
 int frame_index = 0; // Reset this for each test or keep a global count as needed.
 
 
@@ -93,7 +98,7 @@ void frameSaver() {
             
             // Construct folder path and filename as before
             std::ostringstream folderStream;
-            folderStream << "E:/datasets/REDS/sim_dataset/target/" << std::setfill('0') << std::setw(3) << frame.test_index << "/";
+            folderStream << "E:/datasets/REDS/sim_dataset/videos/" << std::setfill('0') << std::setw(3) << frame.test_index << "/";
             std::string folderPath = folderStream.str();
             createDirectory(folderPath);
             
@@ -197,7 +202,7 @@ void initOpenGL(){
     initGLEW();
 
     //Background color
-    GLCall(glClearColor( 0.0, 0.0, 0.0, 1.0 )); 
+    GLCall(glClearColor(0.24705882352941178, 0.30196078431372547, 0.3254901960784314, 1.0 )); 
     
     GLCall(glEnable(GL_MULTISAMPLE));
 
@@ -220,17 +225,14 @@ void mainLoop() {
     test::Test* current_test = nullptr;
     test::TestMenu* test_menu = new test::TestMenu(current_test);
     current_test = test_menu;
-    // test_menu->registerTest<test::TestRefactor>("Refactor");
-    // test_menu->registerTest<test::TestMultiple>("Multiple");
-    // test_menu->registerTest<test::TestLights>("Lights");
-    test_menu->registerTest<test::TestComputeShader>("ComputeShader");
-    test_menu->registerTest<test::TestRotation>("Rotation");
-    // test_menu->registerTest<test::TestRefactor>("1. Colision simple entre 2 cuerpos");
-    // test_menu->registerTest<test::TestMultiple>("2. Apilamiento de multiples objetos");
-    // test_menu->registerTest<test::TestLights>("3. Colisiones complejas sin gravedad");
-    // test_menu->registerTest<test::TestComputeShader>("4. Colisiones complejas con gravedad");
-    // test_menu->registerTest<test::TestRotation>("5. Entorno uniforme");
 
+    test_menu->registerTest<test::TestRender>("0. Render");
+    test_menu->registerTest<test::TestFreeCollisions>("1. Deteccion de colisiones");
+    test_menu->registerTest<test::TestComputeShader>("2. Stacking extremo");
+    test_menu->registerTest<test::TestRotation>("3. Interaccion física");
+    test_menu->registerTest<test::TestComplex>("4. Colisiones Complejas");
+    test_menu->registerTest<test::TestComplex2>("5. Colisiones Complejas 2");
+    test_menu->registerTest<test::TestComplex3>("6. Colisiones Complejas 3");
     // Variables to handle key press state
     bool r_key_pressed = false;
 
@@ -277,7 +279,8 @@ void mainLoop() {
             r_key_pressed = false;
         }
 
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        // GLCall(glClearColor(0.24705882352941178, 0.30196078431372547, 0.3254901960784314, 1.0 )); 
+        GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0 )); 
         renderer.clear();
 
         // Always initialize ImGui for the frame, even when recording
@@ -319,7 +322,7 @@ void mainLoop() {
             glFinish();
             saveFrameAsync(test_index, frame_index, w_width, w_height);
             frame_index++;
-            if (frame_index >= 100)
+            if (frame_index >= 1000)
                 record = false;
         }
 

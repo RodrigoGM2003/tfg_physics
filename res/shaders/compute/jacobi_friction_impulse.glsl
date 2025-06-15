@@ -38,6 +38,8 @@ layout(std430, binding = 29) buffer DeltaVBuffer {
 
 
 uniform float delta_time;
+uniform float DefaultRestitution = 0.2;
+uniform float DefaultFrictionCoefficient = 0.1;
 // --- Shader Execution Configuration ---
 layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in; // Workgroup size
 
@@ -48,8 +50,6 @@ void main() {
 
     float BaumgarteBeta = 0.1;
     float BaumgarteSlop = 0.01;
-    float DefaultRestitution = 0.5; 
-    float DefaultFrictionCoefficient = 0.4;
 
     if (gid >= collisionCount ||  delta_time < 0.01f) {
         return; // Exit if gid is out of bounds

@@ -53,17 +53,9 @@ void main() {
     // Get texture coordinate from SSBO based on vertex ID
     v_texCoord = texCoords[gl_VertexID];
     
-    // Use constant color from uniform (or keep using attribute if needed)
-    // v_color = results[gl_InstanceID] > 0 ? vec4(1.0f, 0.0f, 0.0f, 1.0f) : colors[gl_InstanceID];
-
-    if(second_results[gl_InstanceID] > 0){
-        v_color = vec4(0.0f, 1.0f, 0.0f, 1.0f);
-    }
-    else if (results[gl_InstanceID] > 0){
+   
+    if(results[gl_InstanceID] > 0 ){
         v_color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
-    }
-    else if(second_results[gl_InstanceID] < 0 || results[gl_InstanceID] < 0){
-        v_color = vec4(0.0f, 0.0f, 1.0f, 1.0f);
     }
     else {
         v_color = colors[gl_InstanceID];

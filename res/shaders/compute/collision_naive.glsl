@@ -35,9 +35,6 @@ void main() {
     if (gid >= spheres.length()) return;
 
     if(start == 0){
-        results[gid] = 0;
-        second_results[gid] = 0;
-
         // Initialize collision count if this is the first invocation
         if(gid == 0) collisionCount = 0;
     }
